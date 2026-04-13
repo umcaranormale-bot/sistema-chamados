@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Painel - Help Desk</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        
+        /* A NOVA BARRA DO TOPO (HEADER) */
+        .cabecalho {
+            width: 100%;
+            max-width: 700px;
+            background-color: #212529; /* Mesma cor escura e moderna do login */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between; /* Empurra o nome pra esquerda e o botão pra direita */
+            align-items: center;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .boas-vindas { font-size: 18px; font-weight: bold; }
+        .nome-destaque { color: #0dcaf0; } /* Um azul claro para destacar o nome */
+        
+        /* O BOTÃO DE SAIR VERMELHO */
+        .btn-sair {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-sair:hover { background-color: #b02a37; }
+
+        /* O resto do design original */
+        .container-painel { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 700px; margin-bottom: 30px; box-sizing: border-box; }
+        h2 { color: #0d6efd; margin-top: 0; }
+        .grupo-campo { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-salvar { background-color: #198754; color: white; padding: 12px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-salvar:hover { background-color: #157347; }
+        .opcional { color: #888; font-size: 12px; font-weight: normal; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+
+    <header class="cabecalho">
+        <div class="boas-vindas">
+            Olá, <span id="nome-usuario" class="nome-destaque">Usuário</span>! 👋
+        </div>
+        <button class="btn-sair" onclick="fazerLogout()">Sair do Sistema</button>
+    </header>
+
+    <div class="container-painel">
+        <h2>📝 Abrir Novo Chamado</h2>
+        <form id="form-chamado" onsubmit="enviarChamado(event)">
+            
+            <div class="grupo-campo">
+                <label>Categoria (Obrigatório)</label>
+                <select id="categoria" required>
+                    <option value="">Selecione...</option>
+                    <option value="Impressora">Impressora / Toner</option>
+                    <option value="Internet">Sem Internet / Rede</option>
+                    <option value="Sistema">Erro no Sistema (SoulMV)</option>
+                    <option value="Hardware">Computador não liga</option>
+                </select>
+            </div>
+
+            <div class="grupo-campo">
+                <label>Setor (Obrigatório)</label>
+                <select id="setor" required>
+                    <option value="">Selecione...</option>
+                    <option value="Recepcao">Recepção</option>
+                    <option value="UTI">UTI</option>
+                    <option value="Faturamento">Faturamento</option>
+                    <option value="Consultorio">Consultório</option>
+                </select>
+            </div>
+
+            <div class="grupo-campo">
+                <label>Descrição do Problema (Obrigatório)</label>
+                <textarea id="descricao" rows="4" required placeholder="Descreva o problema..."></textarea>
+            </div>
+
+            <div class="grupo-campo">
+                <label>IP do Computador <span class="opcional">(Opcional)</span></label>
+                <input type="text" id="ip" placeholder="Ex: 192.168.1.50">
+            </div>
+
+            <div class="grupo-campo">
+                <label>Ramal <span class="opcional">(Opcional)</span></label>
+                <input type="text" id="ramal" placeholder="Ex: 4052">
+            </div>
+
+            <button type="submit" class="btn-salvar">Gerar Número e Abrir Chamado</button>
+        </form>
+    </div>
+
+    <div class="container-painel">
+        <h2>📋 Meus Chamados Abertos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Protocolo</th>
+                    <th>Categoria</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-corpo">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Pega os dados do Crachá Virtual
+        const idLogado = localStorage.getItem('usuarioLogado_Id');
+        const nomeLogado = localStorage.getItem('usuarioLogado_Nome');
+
+        // Se a pessoa tentar acessar direto sem logar, chuta ela de volta pro login
+        if(!idLogado) {
+            window.location.href = "sistema.html";
+        } else {
+            // A MÁGICA DA PERSONALIZAÇÃO: Troca a palavra 'Usuário' pelo nome da pessoa!
+            document.getElementById('nome-usuario').innerText = nomeLogado;
+        }
+
+        // --- A NOVA FUNÇÃO DE LOGOUT ---
+        function fazerLogout() {
+            if(confirm("Tem certeza que deseja sair do sistema?")) {
+                localStorage.clear(); // Apaga o crachá do navegador (Id, Nome e Perfil)
+                window.location.href = "sistema.html"; // Redireciona para o login
+            }
+        }
+
+        // Funções antigas (mantidas exatamente iguais)
+        function carregarMeusChamados() {
+            fetch(`https://192.168.0.188:57064/api/chamados/usuario/${idLogado}`)
+                .then(res => res.json())
+                .then(chamados => {
+                    const corpo = document.getElementById('tabela-corpo');
+                    corpo.innerHTML = '';
+                    chamados.forEach(c => {
+                        corpo.innerHTML += `
+                            <tr>
+                                <td>${c.numero}</td>
+                                <td>${c.categoria}</td>
+                                <td>${c.data}</td>
+                                <td><strong>${c.status}</strong></td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function enviarChamado(event) {
+            event.preventDefault(); 
+            const urlAPI = 'https://192.168.0.188:57064/api/chamados';
+
+            const pacoteDados = {
+                Categoria: document.getElementById('categoria').value,
+                Setor: document.getElementById('setor').value,
+                DescricaoProblema: document.getElementById('descricao').value,
+                IP: document.getElementById('ip').value,
+                Ramal: document.getElementById('ramal').value,
+                UsuarioId: parseInt(idLogado)
+            };
+
+            fetch(urlAPI, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pacoteDados)
+            })
+            .then(resposta => resposta.json())
+            .then(dadosRetornados => {
+                alert("✅ " + dadosRetornados.mensagem + "\n\nSeu Número de Protocolo é: " + dadosRetornados.numero);
+                document.getElementById('form-chamado').reset(); 
+                carregarMeusChamados(); 
+            });
+        }
+
+        // Carrega a tabela assim que a página abrir
+        carregarMeusChamados();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Help Desk TI</title>
+    <style>
+        /* CSS: Deixando com cara de sistema corporativo */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .caixa-login {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .caixa-login h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .campo-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Impede que o input vaze da tela */
+        }
+        .btn-entrar {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-entrar:hover { background-color: #0b5ed7; }
+        
+        #mensagem-erro {
+            color: red;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none; /* Começa invisível */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="caixa-login">
+        <h2>💻 Portal de TI</h2>
+        <p>Faça login para abrir ou gerenciar chamados.</p>
+
+        <form id="form-login" onsubmit="fazerLogin(event)">
+            <input type="email" id="email" class="campo-input" placeholder="Seu E-mail" required>
+            <input type="password" id="senha" class="campo-input" placeholder="Sua Senha" required>
+            
+            <button type="submit" class="btn-entrar">Entrar no Sistema</button>
+            <a href="cadastro.html">Criar uma conta</a>
+        </form>
+
+        <p id="mensagem-erro">E-mail ou senha incorretos.</p>
+    </div>
+
+    <script>
+        function fazerLogin(event) {
+            // 1. Impede a página de piscar/recarregar quando clica no botão (Comportamento padrão de formulários antigos)
+            event.preventDefault(); 
+
+            // 2. O Endereço do nosso C# (Já com a sua porta!)
+            const urlAPI = 'https://192.168.0.188:57064/api/login';
+
+            // 3. Pega o que o usuário digitou nas caixinhas
+            const emailDigitado = document.getElementById('email').value;
+            const senhaDigitada = document.getElementById('senha').value;
+
+            // 4. Cria o "pacote" de dados no formato exato que o C# está esperando
+            const pacoteDados = {
+                Email: emailDigitado,
+                Senha: senhaDigitada
+            };
+
+            // 5. Chama o Garçom (O Fetch), mas agora enviando dados (POST)
+            fetch(urlAPI, {
+                method: 'POST', // Mudamos de GET para POST!
+                headers: {
+                    'Content-Type': 'application/json' // Avisa o C# que estamos mandando um JSON
+                },
+                body: JSON.stringify(pacoteDados) // Pega nosso pacote e transforma em texto para viajar pela internet
+            })
+            .then(resposta => {
+                if (resposta.ok) {
+                    return resposta.json(); // Se a senha estiver certa (Status 200 OK), pega os dados
+                } else {
+                    throw new Error('Credenciais inválidas'); // Se o C# devolver "Unauthorized", cai no erro
+                }
+            })
+            .then(dadosDoUsuario => {
+                // 1. CRIANDO O CRACHÁ VIRTUAL (Salvando na memória do navegador)
+                localStorage.setItem('usuarioLogado_Id', dadosDoUsuario.idUsuario);
+                localStorage.setItem('usuarioLogado_Nome', dadosDoUsuario.nome);
+                localStorage.setItem('usuarioLogado_Perfil', dadosDoUsuario.perfil);
+
+                // 2. A PORTA CERTA PARA A PESSOA CERTA
+                if (dadosDoUsuario.perfil === 'Tecnico') {
+                    // Se for TI, vai para o painel de gerenciamento
+                    window.location.href = 'painel-tecnico.html'; 
+                } else {
+                    // Se for Enfermeiro/Comum, vai para o painel de abrir chamados
+                    window.location.href = 'painel-usuario.html'; 
+                }
+            })
+            .catch(erro => {
+                // Se deu erro, faz o texto vermelho aparecer na tela
+                document.getElementById('mensagem-erro').style.display = 'block';
+            });
+        }
+    </script>
+
+</body>
+</html>

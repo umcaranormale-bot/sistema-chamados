@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Conta - Help Desk</title>
+    <style>
+        body { font-family: Arial; background-color: #212529; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .caixa { background: #343a40; color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #495057; background: #495057; color: white; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #157347; }
+        a { display: block; margin-top: 15px; color: #0dcaf0; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="caixa">
+        <h2>Criar Nova Conta</h2>
+        <form id="form-cadastro" onsubmit="criarConta(event)">
+            <input type="text" id="nome" placeholder="Seu Nome Completo" required>
+            <input type="email" id="email" placeholder="Seu E-mail" required>
+            <input type="password" id="senha" placeholder="Crie uma Senha" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <a href="sistema.html">Já tem conta? Voltar para o Login</a>
+    </div>
+
+    <script>
+        function criarConta(event) {
+            event.preventDefault();
+            const urlAPI = 'https://192.168.0.188:57064/api/usuarios'; 
+
+            const dados = {
+                Nome: document.getElementById('nome').value,
+                Email: document.getElementById('email').value,
+                Senha: document.getElementById('senha').value
+            };
+
+            fetch(urlAPI, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            })
+            .then(resposta => resposta.json().then(data => ({ status: resposta.status, body: data })))
+            .then(resultado => {
+                if(resultado.status === 200) {
+                    alert("✅ " + resultado.body.mensagem);
+                    window.location.href = "sistema.html"; // Volta pro login com o nome certo!
+                } else {
+                    alert("❌ " + resultado.body.mensagem);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

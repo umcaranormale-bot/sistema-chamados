@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Técnico - TI</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #0d6efd; color: white; }
+        
+        /* Estilo dos Filtros */
+        .filtros { margin: 20px 0; display: flex; gap: 10px; }
+        .btn-filtro { padding: 8px 15px; border: 1px solid #0d6efd; background: white; color: #0d6efd; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .btn-filtro.ativo { background: #0d6efd; color: white; }
+        
+        .btn-status { cursor: pointer; padding: 5px; background: #ffc107; border: none; border-radius: 3px; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🛠 Gerenciamento de TI</h2>
+        <a href="sistema.html" style="color: red; text-decoration: none;">Sair do Sistema</a>
+
+        <div class="filtros">
+            <button class="btn-filtro ativo" onclick="filtrar('Todos', this)">Todos</button>
+            <button class="btn-filtro" onclick="filtrar('Aberto', this)">Abertos</button>
+            <button class="btn-filtro" onclick="filtrar('Em Atendimento', this)">Em Atendimento</button>
+            <button class="btn-filtro" onclick="filtrar('Finalizado', this)">Finalizados</button>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Protocolo</th>
+                    <th>Categoria</th>
+                    <th>Setor</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="lista-geral"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let chamadosOriginais = []; // Guardamos a lista completa aqui
+
+        function buscarTodos() {
+            fetch('https://192.168.0.188:57064/api/chamados/todos')
+                .then(res => res.json())
+                .then(dados => {
+                    chamadosOriginais = dados;
+                    renderizarTabela(dados);
+                });
+        }
+
+        function renderizarTabela(lista) {
+            const corpo = document.getElementById('lista-geral');
+            corpo.innerHTML = '';
+            lista.forEach(c => {
+                corpo.innerHTML += `
+                    <tr>
+                        <td>${c.usuario}</td>
+                        <td>${c.numero}</td>
+                        <td>${c.categoria}</td>
+                        <td>${c.setor}</td>
+                        <td><strong>${c.status}</strong></td>
+                        <td>
+                            ${c.status !== 'Finalizado' ? `
+                                <button class="btn-status" onclick="mudarStatus(${c.id}, 'Em Atendimento')">Atender</button>
+                                <button class="btn-status" style="background:#198754; color:white;" onclick="mudarStatus(${c.id}, 'Finalizado')">Finalizar</button>
+                            ` : '✅'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filtrar(status, botao) {
+            // Muda a aparência dos botões
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+            botao.classList.add('ativo');
+
+            if (status === 'Todos') {
+                renderizarTabela(chamadosOriginais);
+            } else {
+                const filtrados = chamadosOriginais.filter(c => c.status === status);
+                renderizarTabela(filtrados);
+            }
+        }
+
+        function mudarStatus(id, novo) {
+            fetch('https://192.168.0.188:57064/api/chamados/atualizar-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ChamadoId: id, NovoStatus: novo })
+            }).then(() => buscarTodos());
+        }
+
+        buscarTodos();
+    </script>
+</body>
+</html>
