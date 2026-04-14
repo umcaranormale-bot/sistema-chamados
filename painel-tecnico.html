@@ -49,7 +49,7 @@
         let chamadosOriginais = []; // Guardamos a lista completa aqui
 
         function buscarTodos() {
-            fetch('https://192.168.0.188:57064/api/chamados/todos')
+            fetch('http://localhost:5000/api/chamados/todos')
                 .then(res => res.json())
                 .then(dados => {
                     chamadosOriginais = dados;
@@ -93,7 +93,7 @@
         }
 
         function mudarStatus(id, novo) {
-            fetch('https://192.168.0.188:57064/api/chamados/atualizar-status', {
+            fetch('http://localhost:5000/api/chamados/atualizar-status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: id, NovoStatus: novo })

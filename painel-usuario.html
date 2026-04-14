@@ -145,7 +145,7 @@
 
         // Funções antigas (mantidas exatamente iguais)
         function carregarMeusChamados() {
-            fetch(`https://192.168.0.188:57064/api/chamados/usuario/${idLogado}`)
+            fetch(`http://localhost:5000/api/chamados/usuario/${idLogado}`)
                 .then(res => res.json())
                 .then(chamados => {
                     const corpo = document.getElementById('tabela-corpo');
@@ -165,7 +165,7 @@
 
         function enviarChamado(event) {
             event.preventDefault(); 
-            const urlAPI = 'https://192.168.0.188:57064/api/chamados';
+            const urlAPI = 'http://localhost:5000/api/chamados';
 
             const pacoteDados = {
                 Categoria: document.getElementById('categoria').value,
