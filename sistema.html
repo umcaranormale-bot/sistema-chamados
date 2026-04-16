@@ -80,7 +80,7 @@
             event.preventDefault(); 
 
             // 2. O Endereço do nosso C# (Já com a sua porta!)
-            const urlAPI = 'http://localhost:5000/api/login';
+            const urlAPI = 'http://10.21.3.8:61759/api/login';
 
             // 3. Pega o que o usuário digitou nas caixinhas
             const emailDigitado = document.getElementById('email').value;
@@ -109,9 +109,10 @@
             })
             .then(dadosDoUsuario => {
                 // 1. CRIANDO O CRACHÁ VIRTUAL (Salvando na memória do navegador)
-                localStorage.setItem('usuarioLogado_Id', dadosDoUsuario.idUsuario);
+                localStorage.setItem('usuarioLogado_Id', dadosDoUsuario.id);
                 localStorage.setItem('usuarioLogado_Nome', dadosDoUsuario.nome);
                 localStorage.setItem('usuarioLogado_Perfil', dadosDoUsuario.perfil);
+                localStorage.setItem('usuarioLogado_Email', dadosDoUsuario.email);
 
                 // 2. A PORTA CERTA PARA A PESSOA CERTA
                 if (dadosDoUsuario.perfil === 'Tecnico') {
