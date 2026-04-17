@@ -86,24 +86,45 @@
 
             <div class="grupo-campo">
                 <label>Setor (Obrigatório)</label>
-                <select id="setor" required>
+                <select id="setor" onchange="atualizarLocalizacao()" required>
                     <option value="">Selecione...</option>
+                    <option value="Acolhimento Cirúrgico">Acolhimento Cirúrgico</option>
                     <option value="Casa das Marias">Casa das Marias</option>
+                    <option value="Cirurgia Geral">Cirurgia Geral</option>
                     <option value="Clínica Médica (6° Direito)">Clínica Médica (6° Direito)</option>
                     <option value="Clínica Médica (6° Esquerdo)">Clínica Médica (6° Esquerdo)</option>
                     <option value="Direção">Direção</option>
+                    <option value="Emergência Obstétrica">Emergência Obstétrica</option>
+                    
+                    <option value="Emergência Pediátrica">Emergência Pediátrica</option>
+                    
                     <option value="Faturamento">Faturamento</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Manutenção">Manutenção</option>
+                    <option value="Pavilhão(Clínica Pediátrica)">Pavilhão(Clínica Pediátrica)</option>
+                    <option value="Pavilhão(Clínica Pediátrica)">Pavilhão(Clínica Pediátrica)</option>
+                    <option value="Portaria">Portaria</option>
+                    <option value="Proctologia">Proctologia</option>
                     <option value="Recepcao">Recepção</option>
+                    <option value="Rouparia">Rouparia</option>
+                    <option value="SAF">SAF</option>
+                    <option value="Sala 3">Sala 3</option>
                     <option value="SENF">SENF</option>
+                    <option value="Suprimentos">Suprimentos</option>
                     <option value="UTI Neo 1">UTI Neo 1</option>
                     <option value="UTI Neo 2">UTI Neo 2</option>
                     <option value="UTI">UTI Adulto</option>
+                </select>
+            </div> <div class="grupo-campo" id="caixa-localizacao" style="display: none;">
+                <label>Localização (Obrigatório)</label>
+                <select id="localizacao" style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Selecione o local exato...</option>
                 </select>
             </div>
 
             <div class="grupo-campo">
                 <label>Descrição do Problema (Obrigatório)</label>
-                <textarea id="descricao" rows="4" required placeholder="Descreva o problema..."></textarea>
+                <textarea id="descricao" rows="4" required placeholder="Descreva o problema..." style="resize: none;"></textarea>
             </div>
 
             <div class="grupo-campo">
@@ -250,11 +271,24 @@ function carregarMeusChamados() {
             event.preventDefault(); 
             const urlAPI = 'http://10.21.3.8:61759/api/chamados';
 
+            // =====================================
+            // TRUQUE DA CONCATENAÇÃO
+            // =====================================
+            let setorFinal = document.getElementById('setor').value;
+            const locSelecionada = document.getElementById('localizacao').value;
+            const caixaLoc = document.getElementById('caixa-localizacao');
+
+            // Se a caixa de localização estiver visível e preenchida, junta os textos!
+            if (caixaLoc.style.display === 'block' && locSelecionada !== "") {
+                setorFinal = setorFinal + " - " + locSelecionada;
+            }
+            // =====================================
+
             const pacoteDados = {
-                Nome: nomeLogado, // <--- Puxa direto da memória com segurança total
+                Nome: nomeLogado, 
                 Email: emailLogado,
                 Categoria: document.getElementById('categoria').value,
-                Setor: document.getElementById('setor').value,
+                Setor: setorFinal, // <-- Usa a variável juntada aqui!
                 DescricaoProblema: document.getElementById('descricao').value,
                 IP: document.getElementById('ip').value,
                 Ramal: document.getElementById('ramal').value,
@@ -269,13 +303,14 @@ function carregarMeusChamados() {
             .then(resposta => resposta.json())
             .then(dadosRetornados => {
                 alert("✅ " + dadosRetornados.mensagem + "\n\nSeu Número de Protocolo é: " + dadosRetornados.numero);
-
+                
                 document.getElementById('form-chamado').reset(); 
-
                 document.getElementById('nomeSolicitante').value = nomeLogado;
-
                 document.getElementById('categoria').innerHTML = '<option value="">Escolha um tipo de suporte acima primeiro</option>';
-
+                
+                // ESCONDE A CAIXA DE LOCALIZAÇÃO PARA O PRÓXIMO CHAMADO
+                document.getElementById('caixa-localizacao').style.display = 'none';
+                
                 carregarMeusChamados(); 
             });
         }
@@ -303,6 +338,54 @@ function carregarMeusChamados() {
                     "Outros (Equipamentos)"
                 ]
             };
+
+            // =========================================================
+            // 📌 DICIONÁRIO DE LOCALIZAÇÕES
+            // =========================================================
+            const listasDeLocalizacoes = {
+                "Emergência Pediátrica": [
+                    "Posto (Sala Vermelha)",
+                    "Sala Verde",
+                    "Sala Amarela",
+                    "Consultório 1",
+                    "Consultório 2"
+                ],
+
+                "Emergência Obstétrica": [
+                    "Posto",
+                    "Consultório 1",
+                    "Consultório 2"
+                ]
+
+                
+                // Se no futuro você quiser fazer isso para a UTI, é só adicionar aqui:
+                // "UTI Adulto": ["Leito 1", "Leito 2", "Leito 3"]
+            };
+
+            function atualizarLocalizacao() {
+                const setorSelecionado = document.getElementById('setor').value;
+                const caixaLocalizacao = document.getElementById('caixa-localizacao');
+                const selectLocalizacao = document.getElementById('localizacao');
+
+                // Limpa as opções da localização
+                selectLocalizacao.innerHTML = '<option value="">Selecione o local exato...</option>';
+
+                // Se o setor escolhido estiver no nosso dicionário de localizações...
+                if (listasDeLocalizacoes[setorSelecionado]) {
+                    caixaLocalizacao.style.display = 'block'; // Mostra a caixa
+                    selectLocalizacao.required = true; // Torna obrigatório preencher
+
+                    // Preenche com as opções
+                    listasDeLocalizacoes[setorSelecionado].forEach(loc => {
+                        selectLocalizacao.innerHTML += `<option value="${loc}">${loc}</option>`;
+                    });
+                } else {
+                    // Se o setor não tem localização específica, esconde a caixa
+                    caixaLocalizacao.style.display = 'none';
+                    selectLocalizacao.required = false; 
+                    selectLocalizacao.value = ""; 
+                }
+            }
 
             // =========================================================
             // FUNÇÃO QUE FAZ A TROCA DAS OPÇÕES NA TELA
