@@ -88,10 +88,16 @@
                 <label>Setor (Obrigatório)</label>
                 <select id="setor" required>
                     <option value="">Selecione...</option>
-                    <option value="Recepcao">Recepção</option>
-                    <option value="UTI">UTI</option>
+                    <option value="Casa das Marias">Casa das Marias</option>
+                    <option value="Clínica Médica (6° Direito)">Clínica Médica (6° Direito)</option>
+                    <option value="Clínica Médica (6° Esquerdo)">Clínica Médica (6° Esquerdo)</option>
+                    <option value="Direção">Direção</option>
                     <option value="Faturamento">Faturamento</option>
-                    <option value="Consultorio">Consultório</option>
+                    <option value="Recepcao">Recepção</option>
+                    <option value="SENF">SENF</option>
+                    <option value="UTI Neo 1">UTI Neo 1</option>
+                    <option value="UTI Neo 2">UTI Neo 2</option>
+                    <option value="UTI">UTI Adulto</option>
                 </select>
             </div>
 
@@ -141,22 +147,30 @@
             <div id="modal-detalhes" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:25px; border-radius:8px; width:450px; z-index:1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
                 <h3 id="modal-numero" style="color: #0d6efd; margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;">TIC-XXXXX</h3>
                 
+                <p><strong>Setor:</strong> <span id="modal-setor"></span></p>
                 <p><strong>Categoria:</strong> <span id="modal-categoria"></span></p>
                 
-                <p><strong>Sua Descrição:</strong></p>
-                <textarea id="modal-descricao" rows="4" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
+                <p><strong>Descrição do Problema:</strong></p>
+                <textarea id="modal-descricao" rows="3" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
                 
                 <hr style="border: 1px solid #eee; margin: 15px 0;">
+                <p style="margin-bottom: 5px; color: #333;"><strong>💬 Histórico / Chat:</strong></p>
                 
-                <p><strong>Resposta da TI:</strong> <br>
-                <span id="detalhe-solucao" style="color: #198754; font-weight: bold; display: inline-block; margin-top: 5px;"></span>
-                </p>
-
-                <br>
-                <button onclick="fecharModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Fechar Janela</button>
+                <div id="caixa-chat" style="height: 180px; overflow-y: auto; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="input-mensagem" placeholder="Escreva uma mensagem..." style="flex: 1; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button onclick="enviarMensagem()" style="background: #198754; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Enviar</button>
+                </div>
+                <button onclick="fecharModal()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Fechar</button>
             </div>
 
     <script>
+
+        let chamadoAbertoId = 0; 
+        let loopChat = null;
+
         // Pega os dados do Crachá Virtual
         const idLogado = localStorage.getItem('usuarioLogado_Id');
         const nomeLogado = localStorage.getItem('usuarioLogado_Nome');
@@ -184,14 +198,14 @@
 let chamadosDoUsuario = [];
 
 function carregarMeusChamados() {
-    fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}`)
+    // O "?t=" + getTime() obriga o navegador a sempre buscar o status mais recente do C#
+    fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
         .then(res => res.json())
         .then(chamados => {
             chamadosDoUsuario = chamados; // Salva na memória
             const corpo = document.getElementById('tabela-corpo');
             corpo.innerHTML = '';
             
-            // Usamos (c, index) para saber qual botão foi clicado
             chamados.forEach((c, index) => { 
                 corpo.innerHTML += `
                     <tr>
@@ -210,25 +224,26 @@ function carregarMeusChamados() {
 
             // 2. Função para abrir a janelinha com os dados
             function abrirModal(index) {
-                const chamado = chamadosDoUsuario[index];
+            const chamado = chamadosDoUsuario[index];
 
-                document.getElementById('modal-numero').innerText = chamado.numero;
-                document.getElementById('modal-categoria').innerText = chamado.categoria;
-                // O C# deve retornar a descrição. Se vier vazio, mostramos um aviso.
-                document.getElementById('modal-descricao').value = chamado.descricao || "Sem descrição."; 
-                
-                // A MÁGICA DA SOLUÇÃO: Se a solução (solucaoTecnica) existir, mostra ela. Se não, mostra aguardando.
-                // Dica: garanta que a propriedade que vem do C# está escrita exatamente como definido na sua API (pode ser solucaoTecnica, solucao, etc).
-                document.getElementById('detalhe-solucao').innerText = chamado.solucaoTecnica || "Aguardando laudo técnico...";
+            document.getElementById('modal-numero').innerText = chamado.numero;
+            document.getElementById('modal-categoria').innerText = chamado.categoria;
+            document.getElementById('modal-descricao').value = chamado.descricao || "Sem descrição."; 
+            
+            // Liga o Chat
+            chamadoAbertoId = chamado.id; 
+            carregarChat(chamadoAbertoId); 
+            if (loopChat) clearInterval(loopChat);
+            loopChat = setInterval(() => carregarChat(chamadoAbertoId), 5000);
 
-                document.getElementById('fundo-modal').style.display = 'block';
-                document.getElementById('modal-detalhes').style.display = 'block';
+            document.getElementById('fundo-modal').style.display = 'block';
+            document.getElementById('modal-detalhes').style.display = 'block';
         }
 
-            // 3. Função para fechar a janelinha
-            function fecharModal() {
-                document.getElementById('fundo-modal').style.display = 'none';
-                document.getElementById('modal-detalhes').style.display = 'none';
+        function fecharModal() {
+            document.getElementById('fundo-modal').style.display = 'none';
+            document.getElementById('modal-detalhes').style.display = 'none';
+            if (loopChat) clearInterval(loopChat); // Desliga o relógio do chat
         }
 
         function enviarChamado(event) {
@@ -254,7 +269,13 @@ function carregarMeusChamados() {
             .then(resposta => resposta.json())
             .then(dadosRetornados => {
                 alert("✅ " + dadosRetornados.mensagem + "\n\nSeu Número de Protocolo é: " + dadosRetornados.numero);
+
                 document.getElementById('form-chamado').reset(); 
+
+                document.getElementById('nomeSolicitante').value = nomeLogado;
+
+                document.getElementById('categoria').innerHTML = '<option value="">Escolha um tipo de suporte acima primeiro</option>';
+
                 carregarMeusChamados(); 
             });
         }
@@ -306,12 +327,65 @@ function carregarMeusChamados() {
                 }
             }
 
+                function carregarChat(idChamado) {
+        fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios`)
+        .then(res => res.json())
+        .then(mensagens => {
+            const caixa = document.getElementById('caixa-chat');
+            caixa.innerHTML = ''; 
+            
+            if (mensagens.length === 0) {
+                caixa.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; margin-top:20px;">Nenhuma mensagem. Inicie a conversa!</p>';
+                return;
+            }
+
+            mensagens.forEach(m => {
+                const ehMinha = m.remetenteId === parseInt(idLogado);
+                const corFundo = ehMinha ? '#d1e7dd' : '#e2e3e5';
+                const alinhamento = ehMinha ? 'align-self: flex-end;' : 'align-self: flex-start;';
+                const quemEnviou = ehMinha ? 'Você' : `${m.nomeRemetente} (${m.perfilRemetente})`;
+
+                caixa.innerHTML += `
+                    <div style="max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${corFundo}; ${alinhamento}">
+                        <strong style="font-size: 11px; color: #555;">${quemEnviou} - ${m.data}</strong><br>
+                        <span style="font-size: 14px; color: #000;">${m.mensagem}</span>
+                    </div>
+                `;
+            });
+            caixa.scrollTop = caixa.scrollHeight;
+        });
+    }
+
+    function enviarMensagem() {
+        const input = document.getElementById('input-mensagem');
+        const texto = input.value.trim();
+        
+        if (texto === '') return; 
+
+        fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                ChamadoId: chamadoAbertoId, 
+                RemetenteId: parseInt(idLogado), 
+                Mensagem: texto 
+            })
+        }).then(() => {
+            input.value = ''; 
+            carregarChat(chamadoAbertoId); 
+        });
+    }
+
             
 
         // Carrega a tabela assim que a página abrir
         carregarMeusChamados();
+
+        // 👇 ADICIONE ESTA LINHA ABAIXO 👇
+        // Ativa o relógio: atualiza a tela do usuário automaticamente a cada 10 segundos
+        setInterval(carregarMeusChamados, 10000);
                 
-            </script>
+    </script>
 
 </body>
 </html>
