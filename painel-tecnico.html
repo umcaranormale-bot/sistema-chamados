@@ -28,10 +28,12 @@
         <a href="sistema.html" style="color: red; text-decoration: none;">Sair do Sistema</a>
 
         <div class="filtros">
-            <button class="btn-filtro ativo" onclick="filtrar('Todos', this)">Todos</button>
-            <button class="btn-filtro" onclick="filtrar('Aberto', this)">Abertos</button>
-            <button class="btn-filtro" onclick="filtrar('Em Atendimento', this)">Em Atendimento</button>
-            <button class="btn-filtro" onclick="filtrar('Finalizado', this)">Finalizados</button>
+            <div class="filtros">
+                <button class="btn-filtro ativo" onclick="filtrar('Todos', this)">Todos</button>
+                <button class="btn-filtro" onclick="filtrar('Aberto', this)">Abertos</button>
+                <button class="btn-filtro" onclick="filtrar('Em Atendimento', this)">Em Atendimento</button>
+                <button class="btn-filtro" onclick="filtrar('Concluído', this)">Concluídos</button>
+            </div>
         </div>
         
         <table>
@@ -47,225 +49,249 @@
             </thead>
             <tbody id="lista-geral"></tbody>
         </table>
+    </div> <div id="fundo-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
+
+    <div id="modal-detalhes" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:25px; border-radius:8px; width:450px; z-index:1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <h3 id="modal-numero" style="color: #0d6efd; margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;">TIC-XXXXX</h3>
+        
+        <p><strong>Setor:</strong> <span id="modal-setor"></span></p>
+        <p><strong>Categoria:</strong> <span id="modal-categoria"></span></p>
+        <p><strong>IP da Máquina:</strong> <span id="modal-ip" style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-family: monospace;"></span></p>
+        
+        <p><strong>Descrição do Problema:</strong></p>
+        <textarea id="modal-descricao" rows="3" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
+
+        <div id="bloco-anexo" style="display: none; margin-top: 10px;">
+            <a id="btn-ver-anexo" href="#" target="_blank" style="background-color: #0dcaf0; color: black; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">📎 Abrir Anexo (Foto/Vídeo)</a>
+        </div>
+
+        <div id="bloco-solucao" style="display: none; background-color: #d1e7dd; padding: 10px; border-radius: 4px; border-left: 4px solid #198754; margin-top: 15px;">
+            <p style="margin: 0; color: #0f5132;"><strong>✅ Solução Técnica:</strong><br>
+            <span id="modal-solucao"></span></p>
+        </div>
+        <hr style="border: 1px solid #eee; margin: 15px 0;">
+        <p style="margin-bottom: 5px; color: #333;"><strong>💬 Histórico / Chat:</strong></p>
+        
+        <div id="caixa-chat" style="height: 180px; overflow-y: auto; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="input-mensagem" placeholder="Escreva uma mensagem..." style="flex: 1; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" onkeypress="verificarEnter(event)">
+            <button onclick="enviarMensagem()" style="background: #198754; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Enviar</button>
+        </div>
+        <button onclick="fecharModal()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Fechar</button>
     </div>
 
     <script>
+        const meuPerfil = 'Técnico';
         let chamadoAbertoId = 0; 
         let loopChat = null;
+        let memoriaGlobalChat = 0; 
+        let notificacoesChat = []; 
+        let chamadosOriginais = []; 
+        let ultimoIdConhecido = 0; 
+        let filtroAtual = 'Todos'; 
 
-    // 1. Variáveis Globais (Declaradas uma única vez cada)
-    let chamadosOriginais = []; 
-    let ultimoIdConhecido = 0; 
-    let filtroAtual = 'Todos'; 
+        const idLogado = localStorage.getItem('usuarioLogado_Id');
+        if(!idLogado) window.location.href = "sistema.html";
 
-    const idLogado = localStorage.getItem('usuarioLogado_Id');
-        
-        if(!idLogado) {
-            window.location.href = "sistema.html"; // Segurança contra invasos
+        function buscarTodos() {
+            fetch('http://10.21.3.8:61759/api/chamados')
+                .then(res => res.json())
+                .then(dados => {
+                    chamadosOriginais = dados;
+                    if (dados.length > 0) {
+                        const maiorIdAtual = Math.max(...dados.map(c => c.id));
+                        if (ultimoIdConhecido === 0) ultimoIdConhecido = maiorIdAtual; 
+                        else if (maiorIdAtual > ultimoIdConhecido) {
+                            ultimoIdConhecido = maiorIdAtual;
+                            tocarSom(); 
+                            mostrarNotificacaoNavegador("Novo Chamado na Fila!", "Um usuário abriu um chamado.");
+                        }
+                    }
+                    renderizarTabela(filtroAtual === 'Todos' ? chamadosOriginais : chamadosOriginais.filter(c => c.status === filtroAtual));
+                });
         }
 
-    // 2. Função de Busca e Lógica de Som
-    function buscarTodos() {
-        console.log("Buscando novos chamados automaticamente..."); // Isso vai aparecer no F12 para você ver que está funcionando
-        
-        fetch('http://10.21.3.8:61759/api/chamados')
-            .then(res => res.json())
-            .then(dados => {
-                chamadosOriginais = dados;
+        function tocarSom() {
+            new Audio('sons/windows-98-notify.mp3').play().catch(erro => console.log(erro));
+        }
 
-                if (dados.length > 0) {
-                    const maiorIdAtual = Math.max(...dados.map(c => c.id));
+        function filtrar(status, botao) {
+            filtroAtual = status;
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+            botao.classList.add('ativo');
+            renderizarTabela(status === 'Todos' ? chamadosOriginais : chamadosOriginais.filter(c => c.status === status));
+        }
 
-                    if (ultimoIdConhecido === 0) {
-                        ultimoIdConhecido = maiorIdAtual; 
-                    } 
-                    else if (maiorIdAtual > ultimoIdConhecido) {
-                        ultimoIdConhecido = maiorIdAtual;
-                        tocarSom(); // Toca o som do Windows 98!
+        function renderizarTabela(lista) {
+            const corpo = document.getElementById('lista-geral');
+            corpo.innerHTML = '';
+            
+            lista.forEach(c => {
+                let badge = '';
+                if (typeof notificacoesChat !== 'undefined') {
+                    const notif = notificacoesChat.find(n => n.chamadoId === c.id);
+                    if (notif && notif.totalNaoLidas > 0) {
+                        badge = `<span style="background: red; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; margin-left: 5px; position: absolute; top: -8px; right: -8px; border: 2px solid white; z-index: 10;">${notif.totalNaoLidas}</span>`;
                     }
                 }
 
-                // Renderiza a tabela na aba que o técnico está usando
-                if (filtroAtual === 'Todos') {
-                    renderizarTabela(chamadosOriginais);
-                } else {
-                    const filtrados = chamadosOriginais.filter(c => c.status === filtroAtual);
-                    renderizarTabela(filtrados);
+                let botoesAcao = '';
+                if (c.status === 'Finalizado' || c.status === 'Concluído') botoesAcao = '✅ Concluído';
+                else if (c.status === 'Suspenso') botoesAcao = `<button class="btn-status" style="background:#0dcaf0;" onclick="mudarStatus(${c.id}, 'Aberto')">Abrir Chamado</button>`;
+                else {
+                    if (c.status === 'Aberto') botoesAcao += `<button class="btn-status" style="background:#ffc107;" onclick="mudarStatus(${c.id}, 'Em Atendimento')">Atender</button> `;
+                    else if (c.status === 'Em Atendimento') botoesAcao += `<button class="btn-status" style="background:#198754; color:white;" onclick="prepararConclusao(${c.id})">Concluir com Resposta</button> `;
+                    botoesAcao += `<button class="btn-status" style="background:#6c757d; color:white;" onclick="mudarStatus(${c.id}, 'Suspenso')">Suspender</button>`;
                 }
-            })
-            .catch(erro => console.error("Erro na busca automática:", erro));
-    }
 
-    function tocarSom() {
-        const som = new Audio('windows-98-notify.mp3');
-        som.play().catch(erro => {
-            console.log("O navegador bloqueou o som. Clique na página para liberar!", erro);
-        });
-    }
-
-    // 3. Funções de Interface (Filtros e Tabela)
-    function filtrar(status, botao) {
-        filtroAtual = status;
-        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
-        botao.classList.add('ativo');
-        renderizarTabela(status === 'Todos' ? chamadosOriginais : chamadosOriginais.filter(c => c.status === status));
-    }
-
-    function renderizarTabela(lista) {
-        const corpo = document.getElementById('lista-geral');
-        corpo.innerHTML = '';
-        lista.forEach(c => {
-            let botoesAcao = '';
-            if (c.status === 'Finalizado' || c.status === 'Concluído') {
-                botoesAcao = '✅ Concluído';
-            } else if (c.status === 'Suspenso') {
-                botoesAcao = `<button class="btn-status" style="background:#0dcaf0;" onclick="mudarStatus(${c.id}, 'Aberto')">Abrir Chamado</button>`;
-            } else {
-                if (c.status === 'Aberto') {
-                    botoesAcao += `<button class="btn-status" style="background:#ffc107;" onclick="mudarStatus(${c.id}, 'Em Atendimento')">Atender</button> `;
-                } else if (c.status === 'Em Atendimento') {
-                    botoesAcao += `<button class="btn-status" style="background:#198754; color:white;" onclick="prepararConclusao(${c.id})">Concluir com Resposta</button> `;
-                }
-                botoesAcao += `<button class="btn-status" style="background:#6c757d; color:white;" onclick="mudarStatus(${c.id}, 'Suspenso')">Suspender</button>`;
-            }
-
-            corpo.innerHTML += `
-                <tr>
-                    <td>${c.nome || 'Usuário'}</td>
-                    <td>${c.numero}</td>
-                    <td>${c.categoria}</td>
-                    <td>${c.setor}</td>
-                    <td id="status-${c.id}"><strong>${c.status}</strong></td>
-                    <td>
-                        <button onclick="abrirModal(${c.id})" style="background: #0dcaf0; border: none; padding: 5px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-right: 5px;">Detalhes</button>
-                        ${botoesAcao}
-                    </td>
-                </tr>`;
-        });
-    }
-
-    // 4. Outras funções (MudarStatus, Conclusão, Modais)
-    function mudarStatus(id, novo) {
-        fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ChamadoId: id, NovoStatus: novo })
-        }).then(() => buscarTodos());
-    }
-
-    function prepararConclusao(id) {
-        const resposta = prompt("Descreva o laudo técnico:");
-        if (resposta) enviarConclusao(id, resposta);
-    }
-
-    function enviarConclusao(id, resposta) {
-        fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta })
-        }).then(() => buscarTodos());
-    }
-
-        function abrirModal(id) {
-        const chamado = chamadosOriginais.find(c => c.id === id);
-        document.getElementById('modal-numero').innerText = chamado.numero;
-        document.getElementById('modal-setor').innerText = chamado.setor;
-        document.getElementById('modal-categoria').innerText = chamado.categoria;
-        document.getElementById('modal-descricao').value = chamado.descricao;
-        
-        // Liga o Chat
-        chamadoAbertoId = chamado.id; 
-        carregarChat(chamadoAbertoId); 
-        if (loopChat) clearInterval(loopChat);
-        loopChat = setInterval(() => carregarChat(chamadoAbertoId), 5000);
-
-        document.getElementById('fundo-modal').style.display = 'block';
-        document.getElementById('modal-detalhes').style.display = 'block';
-    }
-
-    function fecharModal() {
-        document.getElementById('fundo-modal').style.display = 'none';
-        document.getElementById('modal-detalhes').style.display = 'none';
-        if (loopChat) clearInterval(loopChat); // Desliga o relógio do chat
-    }
-
-    function carregarChat(idChamado) {
-    fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios`)
-    .then(res => res.json())
-    .then(mensagens => {
-        const caixa = document.getElementById('caixa-chat');
-        caixa.innerHTML = ''; 
-        
-        if (mensagens.length === 0) {
-            caixa.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; margin-top:20px;">Nenhuma mensagem. Inicie a conversa!</p>';
-            return;
+                corpo.innerHTML += `
+                    <tr>
+                        <td>${c.nome || 'Usuário'}</td>
+                        <td>${c.numero}</td>
+                        <td>${c.categoria}</td>
+                        <td>${c.setor}</td>
+                        <td id="status-${c.id}"><strong>${c.status}</strong></td>
+                        <td>
+                            <div style="position: relative; display: inline-block;">
+                                <button onclick="abrirModal(${c.id})" style="background: #0dcaf0; border: none; padding: 5px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-right: 5px;">Detalhes</button>
+                                ${badge}
+                            </div>
+                            ${botoesAcao}
+                        </td>
+                    </tr>`;
+            });
         }
 
-        mensagens.forEach(m => {
-            const ehMinha = m.remetenteId === parseInt(idLogado);
-            const corFundo = ehMinha ? '#d1e7dd' : '#e2e3e5';
-            const alinhamento = ehMinha ? 'align-self: flex-end;' : 'align-self: flex-start;';
-            const quemEnviou = ehMinha ? 'Você' : `${m.nomeRemetente} (${m.perfilRemetente})`;
+        function mudarStatus(id, novo) {
+            fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: novo }) }).then(() => buscarTodos());
+        }
 
-            caixa.innerHTML += `
-                <div style="max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${corFundo}; ${alinhamento}">
-                    <strong style="font-size: 11px; color: #555;">${quemEnviou} - ${m.data}</strong><br>
-                    <span style="font-size: 14px; color: #000;">${m.mensagem}</span>
-                </div>
-            `;
+        function prepararConclusao(id) {
+            const resposta = prompt("Descreva o laudo técnico:");
+            if (resposta) fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta }) }).then(() => buscarTodos());
+        }
+
+        function abrirModal(id) {
+            const chamado = chamadosOriginais.find(c => c.id === id);
+            
+            document.getElementById('modal-numero').innerText = chamado.numero;
+            document.getElementById('modal-setor').innerText = chamado.setor; 
+            document.getElementById('modal-categoria').innerText = chamado.categoria;
+            document.getElementById('modal-descricao').value = chamado.descricao || "Sem descrição."; 
+            
+            const campoIp = document.getElementById('modal-ip');
+            if(campoIp) campoIp.innerText = chamado.ip;
+
+            const blocoAnexo = document.getElementById('bloco-anexo');
+            if (chamado.anexo && blocoAnexo) {
+                blocoAnexo.style.display = 'block';
+                document.getElementById('btn-ver-anexo').href = 'http://10.21.3.8:61759' + chamado.anexo;
+            } else if (blocoAnexo) {
+                blocoAnexo.style.display = 'none';
+            }
+
+            document.getElementById('modal-solucao').innerText = chamado.solucaoTecnica || "";
+            document.getElementById('bloco-solucao').style.display = chamado.solucaoTecnica ? 'block' : 'none';
+            
+            chamadoAbertoId = chamado.id; 
+            carregarChat(chamadoAbertoId); 
+            if (loopChat) clearInterval(loopChat);
+            loopChat = setInterval(() => carregarChat(chamadoAbertoId), 5000);
+
+            document.getElementById('fundo-modal').style.display = 'block';
+            document.getElementById('modal-detalhes').style.display = 'block';
+            setTimeout(checarNotificacoesGlobais, 500); 
+        }
+
+        function fecharModal() {
+            document.getElementById('fundo-modal').style.display = 'none';
+            document.getElementById('modal-detalhes').style.display = 'none';
+            if (loopChat) clearInterval(loopChat); 
+        }
+
+        function carregarChat(idChamado) {
+            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            .then(res => res.json())
+            .then(mensagens => {
+                const caixa = document.getElementById('caixa-chat');
+                caixa.innerHTML = ''; 
+                if (mensagens.length === 0) {
+                    caixa.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; margin-top:20px;">Nenhuma mensagem. Inicie a conversa!</p>';
+                    return;
+                }
+                mensagens.forEach(m => {
+                    const ehMinha = m.remetenteId === parseInt(idLogado);
+                    const corFundo = ehMinha ? '#d1e7dd' : '#e2e3e5';
+                    const alinhamento = ehMinha ? 'align-self: flex-end;' : 'align-self: flex-start;';
+                    const quemEnviou = ehMinha ? 'Você' : `${m.nomeRemetente} (${m.perfilRemetente})`;
+
+                    caixa.innerHTML += `
+                        <div style="max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${corFundo}; ${alinhamento}">
+                            <strong style="font-size: 11px; color: #555;">${quemEnviou} - ${m.data}</strong><br>
+                            <span style="font-size: 14px; color: #000;">${m.mensagem}</span>
+                        </div>
+                    `;
+                });
+                caixa.scrollTop = caixa.scrollHeight;
+            });
+        }
+
+        function enviarMensagem() {
+            const input = document.getElementById('input-mensagem');
+            const texto = input.value.trim();
+            if (texto === '') return; 
+            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
+            }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
+        }
+
+        function verificarEnter(event) { if (event.key === 'Enter') enviarMensagem(); }
+
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission();
+
+        function mostrarNotificacaoNavegador(titulo, texto) {
+            if (Notification.permission === "granted") new Notification(titulo, { body: texto, icon: "https://cdn-icons-png.flaticon.com/512/1006/1006509.png" });
+        }
+
+        function checarNotificacoesGlobais() {
+            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
+            .then(res => res.json())
+            .then(dados => {
+                const memoriaAntiga = JSON.stringify(notificacoesChat);
+                notificacoesChat = dados; 
+                if(memoriaAntiga !== JSON.stringify(dados)) {
+                    if (typeof buscarTodos === "function") buscarTodos();
+                }
+                if(dados.length > 0) {
+                    const maiorIdBanco = Math.max(...dados.map(d => d.ultimaMensagemId));
+                    if(memoriaGlobalChat === 0) memoriaGlobalChat = maiorIdBanco; 
+                    else if (maiorIdBanco > memoriaGlobalChat) {
+                        memoriaGlobalChat = maiorIdBanco;
+                        new Audio('sons/msn-sound_1.mp3').play().catch(e => {}); 
+                        mostrarNotificacaoNavegador("Nova Mensagem - Help Desk", "Você tem uma mensagem de um usuário!");
+                    }
+                }
+            });
+        }
+
+        // O espião não vai mais quebrar, pois o fundo-modal já existe!
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                fecharModal();
+            }
         });
-        caixa.scrollTop = caixa.scrollHeight;
-    });
-}
 
-function enviarMensagem() {
-    const input = document.getElementById('input-mensagem');
-    const texto = input.value.trim();
-    
-    if (texto === '') return; 
+        document.getElementById('fundo-modal').addEventListener('click', function() {
+            fecharModal();
+        });
 
-    fetch('http://10.21.3.8:61759/api/chamados/comentario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            ChamadoId: chamadoAbertoId, 
-            RemetenteId: parseInt(idLogado), 
-            Mensagem: texto 
-        })
-    }).then(() => {
-        input.value = ''; 
-        carregarChat(chamadoAbertoId); 
-    });
-}
-
-    // 5. O RELÓGIO (Ativa o sistema)
-    buscarTodos(); // Busca imediata ao carregar
-    setInterval(buscarTodos, 10000); // Repete a cada 10 segundos
-</script>
-
-    <div id="fundo-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
-
-<div id="modal-detalhes" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:25px; border-radius:8px; width:450px; z-index:1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-    <h3 id="modal-numero" style="color: #0d6efd; margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;">TIC-XXXXX</h3>
-    
-    <p><strong>Setor:</strong> <span id="modal-setor"></span></p>
-    <p><strong>Categoria:</strong> <span id="modal-categoria"></span></p>
-    
-    <p><strong>Descrição do Problema:</strong></p>
-    <textarea id="modal-descricao" rows="3" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
-    
-    <hr style="border: 1px solid #eee; margin: 15px 0;">
-    <p style="margin-bottom: 5px; color: #333;"><strong>💬 Histórico / Chat:</strong></p>
-    
-    <div id="caixa-chat" style="height: 180px; overflow-y: auto; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
-        </div>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <input type="text" id="input-mensagem" placeholder="Escreva uma mensagem..." style="flex: 1; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        <button onclick="enviarMensagem()" style="background: #198754; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Enviar</button>
-    </div>
-    <button onclick="fecharModal()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Fechar</button>
-</div>
-
+        buscarTodos(); 
+        setInterval(buscarTodos, 10000);
+        checarNotificacoesGlobais(); 
+        setInterval(checarNotificacoesGlobais, 5000);
+    </script>
 </body>
 </html>

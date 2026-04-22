@@ -67,53 +67,44 @@
             
             <div class="grupo-campo">
                 <div class="grupo-campo">
-                <label>Nome do Solicitante</label>
+                <label style="font-size:larger">Nome do Solicitante</label>
                 <input type="text" id="nomeSolicitante" readonly style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
-                <label>Categoria (Obrigatório)</label>
-                <label for="tipoSuporte">Tipo de Suporte:</label>
+                <label for="tipoSuporte" style="color: red; font-size:larger">Tipo de Suporte (Obrigatório):</label>
                 <select id="tipoSuporte" onchange="atualizarCategorias()" required style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
                 <option value="">Selecione primeiro onde está o problema...</option>
                 <option value="sistemas">🖥️ Suporte ao Sistema (Ex: Soul MV, PEP, IDCE...)</option>
                 <option value="equipamentos">🔌 Suporte Técnico ao Equipamentos e Rede (Ex: PC não liga, Impressora, Internet, Ramal...)</option>
                 </select>
 
-                <label for="categoria">Categoria do Problema:</label>
-                <select id="categoria" required style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
-                <option value="">Escolha um tipo de suporte acima primeiro</option>
+                <div class="grupo-campo">
+                <label for="categoria" style="font-size:larger; display: flex; align-items: center; gap: 10px;">
+                    Categoria do Problema (Obrigatório):
+                    <img id="icone-imagem" src="" style="height: 28px; display: none; border-radius: 4px;" alt="Ícone">
+                    <span id="icone-emoji" style="font-size: 24px; display: none;"></span>
+                </label>
+
+                <select id="categoria" onchange="mostrarIconeCategoria()" required style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Escolha um tipo de suporte acima primeiro</option>
                 </select>
             </div>
 
             <div class="grupo-campo">
-                <label>Setor (Obrigatório)</label>
-                <select id="setor" onchange="atualizarLocalizacao()" required>
-                    <option value="">Selecione...</option>
-                    <option value="Acolhimento Cirúrgico">Acolhimento Cirúrgico</option>
-                    <option value="Casa das Marias">Casa das Marias</option>
-                    <option value="Cirurgia Geral">Cirurgia Geral</option>
-                    <option value="Clínica Médica (6° Direito)">Clínica Médica (6° Direito)</option>
-                    <option value="Clínica Médica (6° Esquerdo)">Clínica Médica (6° Esquerdo)</option>
-                    <option value="Direção">Direção</option>
-                    <option value="Emergência Obstétrica">Emergência Obstétrica</option>
-                    
-                    <option value="Emergência Pediátrica">Emergência Pediátrica</option>
-                    
-                    <option value="Faturamento">Faturamento</option>
-                    <option value="Financeiro">Financeiro</option>
-                    <option value="Manutenção">Manutenção</option>
-                    <option value="Pavilhão(Clínica Pediátrica)">Pavilhão(Clínica Pediátrica)</option>
-                    <option value="Pavilhão(Clínica Pediátrica)">Pavilhão(Clínica Pediátrica)</option>
-                    <option value="Portaria">Portaria</option>
-                    <option value="Proctologia">Proctologia</option>
-                    <option value="Recepcao">Recepção</option>
-                    <option value="Rouparia">Rouparia</option>
-                    <option value="SAF">SAF</option>
-                    <option value="Sala 3">Sala 3</option>
-                    <option value="SENF">SENF</option>
-                    <option value="Suprimentos">Suprimentos</option>
-                    <option value="UTI Neo 1">UTI Neo 1</option>
-                    <option value="UTI Neo 2">UTI Neo 2</option>
-                    <option value="UTI">UTI Adulto</option>
+                <label style="font-size:larger">Qual andar? (Obrigatório)</label>
+                <select id="andar" onchange="atualizarSetores()" required style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Selecione o andar primeiro...</option>
+                    <option value="Térreo">Térreo</option>
+                    <option value="1º Andar">1º Andar</option>
+                    <option value="2º Andar">2º Andar</option>
+                    <option value="6º Andar">6º Andar</option>
+                    <option value="Outros / Anexos">Outros / Anexos</option>
+                </select>
+            </div>
+
+            <div class="grupo-campo">
+                <label style="font-size:larger">Setor (Obrigatório)</label>
+                <select id="setor" onchange="atualizarLocalizacao()" required style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Escolha um andar acima primeiro</option>
                 </select>
             </div> <div class="grupo-campo" id="caixa-localizacao" style="display: none;">
                 <label>Localização (Obrigatório)</label>
@@ -123,23 +114,33 @@
             </div>
 
             <div class="grupo-campo">
-                <label>Descrição do Problema (Obrigatório)</label>
+                <label style="font-size:larger">Descrição do Problema (Obrigatório)</label>
                 <textarea id="descricao" rows="4" required placeholder="Descreva o problema..." style="resize: none;"></textarea>
             </div>
 
             <div class="grupo-campo">
-                <label>IP do Computador <span class="opcional">(Opcional)</span> - <small style="color: #0d6efd;">(Veja o tutorial abaixo se não souber)</small></label>
-                
-                <input type="text" id="ip" placeholder="Ex: 10.21.6.57" style="margin-bottom: 15px;">
-                
-                <video controls style="width: 100%; max-width: 350px; height: auto; border-radius: 4px; border: 1px solid #ccc; background-color: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block;" autoplay loop muted>
-                    <source src="tutorial-visualizar-ip.mp4" type="video/mp4">
-                    Seu navegador não suporta a exibição de vídeos.
-                </video>
+                <label style="font-size:larger">Anexar Foto ou Vídeo <span class="opcional">(Opcional)</span></label>
+                <input type="file" id="anexo" accept="image/*,video/*" style="width: 100%; padding: 8px; border: 1px dashed #0d6efd; border-radius: 4px; background-color: #f8f9fa; cursor: pointer;">
             </div>
 
             <div class="grupo-campo">
-                <label>Ramal <span class="opcional">(Opcional)</span></label>
+                <label style="font-size:larger">IP do Computador <span class="opcional">(Opcional)</span> - <small style="color: #0d6efd;">(Veja o tutorial abaixo se não souber)</small></label>
+                
+                <input type="text" id="ip" placeholder="Aguardando detecção..." style="margin-bottom: 15px;">
+
+                <small style="color: red; display: block; margin-top: -3px; margin-bottom: 8px; font-weight: bold;">
+                    (O IP PREENCHIDO É AUTOMATICAMENTE DO COMPUTADOR ATUAL QUE VOCÊ ESTÁ, caso não seja o IP do computador que está com problema, modifique para o IP certo aCIMA)
+                </small>
+                
+                <video controls style="width: 100%; max-width: 350px; height: auto; border-radius: 4px; border: 1px solid #ccc; background-color: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block;" autoplay loop muted>
+                    <source src="videos/tutorial-visualizar-ip.mp4" type="video/mp4">
+                    Seu navegador não suporta a exibição de vídeos.
+                </video>
+            </div>
+        
+
+            <div class="grupo-campo">
+                <label style="font-size:larger">Ramal <span class="opcional">(Opcional)</span></label>
                 <input type="text" id="ramal" placeholder="Ex: 4052">
             </div>
 
@@ -170,18 +171,29 @@
                 
                 <p><strong>Setor:</strong> <span id="modal-setor"></span></p>
                 <p><strong>Categoria:</strong> <span id="modal-categoria"></span></p>
+                <p><strong>IP da Máquina:</strong> <span id="modal-ip" style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-family: monospace;"></span></p>
+                <p><strong>Ramal:</strong> <span id="modal-ramal"></span></p>
                 
                 <p><strong>Descrição do Problema:</strong></p>
                 <textarea id="modal-descricao" rows="3" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
                 
+                <div id="bloco-anexo" style="display: none; margin-top: 10px;">
+                    <a id="btn-ver-anexo" href="#" target="_blank" style="background-color: #0dcaf0; color: black; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">📎 Abrir Anexo (Foto/Vídeo)</a>
+                </div>
+
+                <div id="bloco-solucao" style="display: none; background-color: #d1e7dd; padding: 10px; border-radius: 4px; border-left: 4px solid #198754; margin-top: 15px;">
+                    <p style="margin: 0; color: #0f5132;"><strong>✅ Solução Técnica:</strong><br>
+                    <span id="modal-solucao"></span></p>
+                </div>
+
                 <hr style="border: 1px solid #eee; margin: 15px 0;">
                 <p style="margin-bottom: 5px; color: #333;"><strong>💬 Histórico / Chat:</strong></p>
                 
                 <div id="caixa-chat" style="height: 180px; overflow-y: auto; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
-                    </div>
+                </div>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="input-mensagem" placeholder="Escreva uma mensagem..." style="flex: 1; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="input-mensagem" placeholder="Escreva uma mensagem..." style="flex: 1; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" onkeypress="verificarEnter(event)">
                     <button onclick="enviarMensagem()" style="background: #198754; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Enviar</button>
                 </div>
                 <button onclick="fecharModal()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Fechar</button>
@@ -189,69 +201,86 @@
 
     <script>
 
+        const meuPerfil = 'Comum'; // Define quem é o usuário para a API
         let chamadoAbertoId = 0; 
         let loopChat = null;
+        let memoriaGlobalChat = 0; 
+        let notificacoesChat = []; 
+        let chamadosDoUsuario = [];
 
-        // Pega os dados do Crachá Virtual
         const idLogado = localStorage.getItem('usuarioLogado_Id');
         const nomeLogado = localStorage.getItem('usuarioLogado_Nome');
         const emailLogado = localStorage.getItem('usuarioLogado_Email');
 
-        // Se a pessoa tentar acessar direto sem logar, chuta ela de volta pro login
-        if(!idLogado) {
-            window.location.href = "sistema.html";
-        } else {
+        if(!idLogado) window.location.href = "sistema.html";
+        else {
             document.getElementById('nome-usuario').innerText = nomeLogado;
-            // ADICIONE ESTA LINHA AQUI: Preenche a caixinha visualmente
             document.getElementById('nomeSolicitante').value = nomeLogado;
         }
 
-        // --- A NOVA FUNÇÃO DE LOGOUT ---
         function fazerLogout() {
             if(confirm("Tem certeza que deseja sair do sistema?")) {
-                localStorage.clear(); // Apaga o crachá do navegador (Id, Nome e Perfil)
-                window.location.href = "sistema.html"; // Redireciona para o login
+                localStorage.clear(); 
+                window.location.href = "sistema.html"; 
             }
         }
 
-        // Funções antigas (mantidas exatamente iguais)
-        // 1. Variável para guardar a memória dos chamados (igual no painel técnico)
-let chamadosDoUsuario = [];
+        function carregarMeusChamados() {
+            fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
+                .then(res => res.json())
+                .then(chamados => {
+                    chamadosDoUsuario = chamados; 
+                    const corpo = document.getElementById('tabela-corpo');
+                    corpo.innerHTML = '';
+                    
+                    chamados.forEach((c, index) => { 
+                        let badge = '';
+                        // A bolinha agora só precisa olhar a API, sem contas matemáticas complicadas
+                        if (typeof notificacoesChat !== 'undefined') {
+                            const notif = notificacoesChat.find(n => n.chamadoId === c.id);
+                            if (notif && notif.totalNaoLidas > 0) {
+                                badge = `<span style="background: red; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; margin-left: 5px; position: absolute; top: -8px; right: -8px; border: 2px solid white; z-index: 10;">${notif.totalNaoLidas}</span>`;
+                            }
+                        }
 
-function carregarMeusChamados() {
-    // O "?t=" + getTime() obriga o navegador a sempre buscar o status mais recente do C#
-    fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
-        .then(res => res.json())
-        .then(chamados => {
-            chamadosDoUsuario = chamados; // Salva na memória
-            const corpo = document.getElementById('tabela-corpo');
-            corpo.innerHTML = '';
-            
-            chamados.forEach((c, index) => { 
-                corpo.innerHTML += `
-                    <tr>
-                        <td>${c.numero}</td>
-                        <td>${c.categoria}</td>
-                        <td>${c.data}</td>
-                        <td><strong>${c.status}</strong></td>
-                        <td>
-                            <button onclick="abrirModal(${index})" style="background: #0dcaf0; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Ver Detalhes</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        });
-}
+                        corpo.innerHTML += `
+                            <tr>
+                                <td>${c.numero}</td>
+                                <td>${c.categoria}</td>
+                                <td>${c.data}</td>
+                                <td><strong>${c.status}</strong></td>
+                                <td>
+                                    <div style="position: relative; display: inline-block;">
+                                        <button onclick="abrirModal(${index})" style="background: #0dcaf0; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Ver Detalhes</button>
+                                        ${badge}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
 
-            // 2. Função para abrir a janelinha com os dados
-            function abrirModal(index) {
+        function abrirModal(index) {
             const chamado = chamadosDoUsuario[index];
-
             document.getElementById('modal-numero').innerText = chamado.numero;
+            document.getElementById('modal-setor').innerText = chamado.setor; // PREENCHE O SETOR
             document.getElementById('modal-categoria').innerText = chamado.categoria;
+            document.getElementById('modal-ip').innerText = chamado.ip; // PREENCHE O IP
+            document.getElementById('modal-ramal').innerText = chamado.ramal; // PREENCHE O RAMAL
             document.getElementById('modal-descricao').value = chamado.descricao || "Sem descrição."; 
             
-            // Liga o Chat
+            const blocoAnexo = document.getElementById('bloco-anexo');
+            if (chamado.anexo && blocoAnexo) {
+                blocoAnexo.style.display = 'block';
+                document.getElementById('btn-ver-anexo').href = 'http://10.21.3.8:61759' + chamado.anexo;
+            } else if (blocoAnexo) {
+                blocoAnexo.style.display = 'none';
+            }
+
+            document.getElementById('modal-solucao').innerText = chamado.solucaoTecnica || "";
+            document.getElementById('bloco-solucao').style.display = chamado.solucaoTecnica ? 'block' : 'none';
+            
             chamadoAbertoId = chamado.id; 
             carregarChat(chamadoAbertoId); 
             if (loopChat) clearInterval(loopChat);
@@ -259,214 +288,400 @@ function carregarMeusChamados() {
 
             document.getElementById('fundo-modal').style.display = 'block';
             document.getElementById('modal-detalhes').style.display = 'block';
+            setTimeout(checarNotificacoesGlobais, 500); 
         }
 
         function fecharModal() {
             document.getElementById('fundo-modal').style.display = 'none';
             document.getElementById('modal-detalhes').style.display = 'none';
-            if (loopChat) clearInterval(loopChat); // Desliga o relógio do chat
+            if (loopChat) clearInterval(loopChat); 
         }
+
+        // ================= TRUQUE DOS DICIONÁRIOS DE CATEGORIAS =================
+        const listasDeCategorias = {
+            "sistemas": [
+                "🏥 Erro no Sistema Hospitalar (SoulMV/PEP)", 
+                "🔑 Reset de Senha / Desbloqueio de Usuário", 
+                "🐌 Lentidão no Sistema", 
+                "💻 Outros (Software)"
+            ],
+            "equipamentos": [
+                "🖥️ Computador não liga", 
+                "👤 Criação de Novo Acesso", 
+                "🌐 Falta de Internet / Problema no Cabo de Rede", 
+                "🖨️ Impressora com defeito / Sem Toner", 
+                "⌨️ Teclado ou Mouse com defeito", 
+                "📞 Telefone / Ramal Mudo", 
+                "🔌 Outros (Equipamentos)"
+            ]
+        };
+
+        const listasDeSetores = {
+            "Térreo": [
+                "Acolhimento Cirúrgico",
+                "Ambulatório - Térreo",
+                "APAC",
+                "Barãozinho",
+                "Cozinha - Nutrição",
+                "Emergência Obstétrica", 
+                "Emergência Pediátrica", 
+                "Endoscopia",
+                "Gráfica",
+                "Internamento",
+                "Manutenção",
+                "Marcação de Consultas",
+                "Oncologia(Santa)", 
+                "Ouvidoria",
+                "Patologia",
+                "Portaria", 
+                "Recepcao", 
+                "Refeitório",
+                "Sala 3",
+                "Serviço Social",
+                "Zeladoria"
+                
+            ],
+            "1º Andar": [
+                "Arquivo Médico", 
+                "Clínica Pediátrica(Pavilhão)", 
+                "NIR", 
+                "Compras/Adesão/Suprimentos",
+                "Ambulatório",
+                "Sala da Nutrição",
+                "Imaginologia",
+                "Resíduos Sólidos",
+                "Agência Transfusional",
+                "Faturamento",
+                "Gestão de Pessoas",
+                "Coreme",
+                "Teste da Orelhinha",
+                "Teste do Pezinho",
+                "Prestação de Contas",
+                "Custos/Patrimônio",
+                "Educação em Saúde - UES",
+                "Conselho Gestor",
+                "CEAB MMH",
+                "Farmácia",
+                "VEAH"   
+            ],
+            "2º Andar": [
+                "Hemodiálise/Nefrologia", 
+                "UTI Adulto", 
+                "Bloco Cirúrgico",
+                "Nutrição",
+                "UTI Pediátrica"
+            ],
+            "3º Andar": [
+                "Engenharia Clínica", 
+                "Banco de Leite",
+                "UTI Pediátrica",
+                "UCI 2",
+                "Nutrição",
+                "CME",
+                "Alojamento Sulfato",
+                "Vascular",
+                "Planejemaneto Cirúrgico"
+            ],
+            "4° Andar": [
+                "Nutrição", 
+                "Alojamento Canguru", 
+                "COB", 
+                "Alto Risco", 
+                "UTI Neo 1", 
+                "UTI Neo 2", 
+                "Serviço Social", 
+                "", 
+                "Suprimentos"
+            ],
+            "5° Andar": [
+                "Nutrição",
+                "Faturamento",
+                "Alojamento Conjunto",
+                "Cartório",
+                "Sala de Evolução"
+            ],
+            "6° Andar": [
+                "Clínica Médica",
+                "Nutrição",
+                "Oncologia"
+            ],
+            "7° Andar": [
+                "Cirurgia Geral",
+                "Ginecologia",
+                "Proctologia",
+                "Nutrição",
+                "CCIH"
+            ],
+            "8° Andar": [
+                "Direção",
+                "SAF",
+                "SENF",
+                "Superintendência da Manutenção",
+                "Financeiro",
+                "Psicologia",
+                "Contratos",
+                "Comissão",
+                "Qualidade",
+                "Monitoramento Obstétrico"
+            ]
+        };
+
+        const listasDeLocalizacoes = {
+            "Emergência Pediátrica": ["Posto (Sala Vermelha)", "Sala Verde", "Sala Amarela", "Consultório 1", "Consultório 2"],
+            "Emergência Obstétrica": ["Posto", "Consultório 1", "Consultório 2"]
+        };
+
+        function atualizarLocalizacao() {
+            const setor = document.getElementById('setor').value;
+            const selectLoc = document.getElementById('localizacao');
+            const caixaLoc = document.getElementById('caixa-localizacao');
+            selectLoc.innerHTML = '<option value="">Selecione o local exato...</option>';
+            if (listasDeLocalizacoes[setor]) {
+                caixaLoc.style.display = 'block';
+                selectLoc.required = true;
+                listasDeLocalizacoes[setor].forEach(loc => selectLoc.innerHTML += `<option value="${loc}">${loc}</option>`);
+            } else {
+                caixaLoc.style.display = 'none';
+                selectLoc.required = false; 
+                selectLoc.value = ""; 
+            }
+        }
+
+        function atualizarCategorias() {
+            const tipo = document.getElementById('tipoSuporte').value;
+            const selectCategoria = document.getElementById('categoria');
+            document.getElementById('icone-imagem').style.display = 'none';
+            document.getElementById('icone-emoji').style.display = 'none';
+            selectCategoria.innerHTML = '<option value="">Selecione a Categoria exata...</option>';
+            if (tipo !== "") listasDeCategorias[tipo].forEach(cat => selectCategoria.innerHTML += `<option value="${cat}">${cat}</option>`);
+        }
+
+        function atualizarSetores() {
+            const andarSelecionado = document.getElementById('andar').value;
+            const selectSetor = document.getElementById('setor');
+            const caixaLoc = document.getElementById('caixa-localizacao');
+            const selectLoc = document.getElementById('localizacao');
+
+            // 1. Limpa as caixas debaixo (Setor e Localização) sempre que o Andar muda
+            selectSetor.innerHTML = '<option value="">Selecione o setor...</option>';
+            caixaLoc.style.display = 'none';
+            selectLoc.required = false;
+            selectLoc.value = "";
+
+            // 2. Preenche a caixa de Setor com as opções do Andar selecionado
+            if (andarSelecionado !== "" && listasDeSetores[andarSelecionado]) {
+                listasDeSetores[andarSelecionado].forEach(setor => {
+                    selectSetor.innerHTML += `<option value="${setor}">${setor}</option>`;
+                });
+            } else if (andarSelecionado === "") {
+                selectSetor.innerHTML = '<option value="">Escolha um andar acima primeiro</option>';
+            }
+        }
+
+        // ==========================================
+        // MÁGICA DA LOGO DO MV
+        // ==========================================
+        // ==========================================
+        // INÍCIO: MÁGICA DOS ÍCONES HÍBRIDOS (FOTO E EMOJI)
+        // ==========================================
+        function mostrarIconeCategoria() {
+            const categoriaSelecionada = document.getElementById('categoria').value;
+            const img = document.getElementById('icone-imagem');
+            const emoji = document.getElementById('icone-emoji');
+            
+            // 1. Começamos escondendo os dois para limpar a tela
+            img.style.display = 'none';
+            emoji.style.display = 'none';
+            
+            // 2. Se a pessoa escolheu algo do SoulMV (Usa a IMAGEM)
+            if (categoriaSelecionada.includes("SoulMV")) {
+                img.src = "icones/BundledBrowser.ico"; 
+                img.style.display = 'block';
+            } 
+            // 3. Se a pessoa escolheu Reset de Senha (Usa o EMOJI)
+            else if (categoriaSelecionada.includes("Reset de Senha")) {
+                emoji.innerText = "🔑"; // O emoji entra aqui em formato de texto!
+                emoji.style.display = 'block';
+            }
+            // 4. Se a pessoa escolheu PC que não liga (Exemplo extra usando emoji)
+            else if (categoriaSelecionada.includes("não liga")) {
+                emoji.innerText = "🖥️"; 
+                emoji.style.display = 'block';
+            } else if (categoriaSelecionada.includes("Novo Acesso")) {
+                emoji.innerText = "👤";
+                emoji.style.display = 'block';
+            }
+        }
+        // ==========================================
+
+        // =========================================================================
 
         function enviarChamado(event) {
             event.preventDefault(); 
-            const urlAPI = 'http://10.21.3.8:61759/api/chamados';
-
-            // =====================================
-            // TRUQUE DA CONCATENAÇÃO
-            // =====================================
-            let setorFinal = document.getElementById('setor').value;
+            const andarSelecionado = document.getElementById('andar').value;
+            let setorFinal = andarSelecionado + " - " + document.getElementById('setor').value;
+            
             const locSelecionada = document.getElementById('localizacao').value;
-            const caixaLoc = document.getElementById('caixa-localizacao');
-
-            // Se a caixa de localização estiver visível e preenchida, junta os textos!
-            if (caixaLoc.style.display === 'block' && locSelecionada !== "") {
-                setorFinal = setorFinal + " - " + locSelecionada;
+            if (document.getElementById('caixa-localizacao').style.display === 'block' && locSelecionada !== "") {
+                setorFinal += " - " + locSelecionada;
             }
-            // =====================================
 
-            const pacoteDados = {
-                Nome: nomeLogado, 
-                Email: emailLogado,
-                Categoria: document.getElementById('categoria').value,
-                Setor: setorFinal, // <-- Usa a variável juntada aqui!
-                DescricaoProblema: document.getElementById('descricao').value,
-                IP: document.getElementById('ip').value,
-                Ramal: document.getElementById('ramal').value,
-                UsuarioId: parseInt(idLogado)
-            };
+            // Criamos um "Pacote de Correio" (FormData) em vez de um envelope JSON
+            const pacoteFormulario = new FormData();
+            pacoteFormulario.append("Nome", nomeLogado);
+            pacoteFormulario.append("Email", emailLogado);
+            pacoteFormulario.append("Categoria", document.getElementById('categoria').value);
+            pacoteFormulario.append("Setor", setorFinal);
+            pacoteFormulario.append("DescricaoProblema", document.getElementById('descricao').value);
+            pacoteFormulario.append("Ramal", document.getElementById('ramal').value);
+            pacoteFormulario.append("UsuarioId", parseInt(idLogado));
+            
+            // Se existir campo de IP visível, manda ele também
+            if(document.getElementById('ip')) {
+                pacoteFormulario.append("IP", document.getElementById('ip').value);
+            }
 
-            fetch(urlAPI, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pacoteDados)
+            // 👇 EMBALA O ARQUIVO (FOTO/VÍDEO) NO PACOTE
+            const campoArquivo = document.getElementById('anexo');
+            if (campoArquivo.files.length > 0) {
+                pacoteFormulario.append("Arquivo", campoArquivo.files[0]);
+            }
+
+            // Mudamos o Fetch. Não enviamos mais 'Content-Type' (o navegador faz sozinho para arquivos)
+            // ... (resto do seu fetch) ...
+            fetch('http://10.21.3.8:61759/api/chamados', { 
+                method: 'POST', 
+                body: pacoteFormulario 
             })
-            .then(resposta => resposta.json())
-            .then(dadosRetornados => {
-                alert("✅ " + dadosRetornados.mensagem + "\n\nSeu Número de Protocolo é: " + dadosRetornados.numero);
+            .then(res => res.json())
+            .then(dados => {
+                alert("✅ " + dados.mensagem + "\n\nSeu Número de Protocolo é: " + dados.numero);
                 
+                // 1. Apaga os textos digitados
                 document.getElementById('form-chamado').reset(); 
                 document.getElementById('nomeSolicitante').value = nomeLogado;
-                document.getElementById('categoria').innerHTML = '<option value="">Escolha um tipo de suporte acima primeiro</option>';
                 
-                // ESCONDE A CAIXA DE LOCALIZAÇÃO PARA O PRÓXIMO CHAMADO
+                // 2. Reseta as listas suspensas
+                document.getElementById('categoria').innerHTML = '<option value="">Escolha um tipo de suporte acima primeiro</option>';
+                document.getElementById('setor').innerHTML = '<option value="">Escolha um andar acima primeiro</option>';
                 document.getElementById('caixa-localizacao').style.display = 'none';
                 
+                // 👇 3. A SOLUÇÃO: Esconde a imagem e o emoji da categoria anterior!
+                document.getElementById('icone-imagem').style.display = 'none';
+                document.getElementById('icone-emoji').style.display = 'none';
+                
+                // 4. Atualiza a tabela com o chamado novo
                 carregarMeusChamados(); 
             });
         }
 
-                    // =========================================================
-            // 📌 DICIONÁRIO DE CATEGORIAS (FÁCIL DE EDITAR AQUI!)
-            // =========================================================
-            // Para adicionar mais, basta colocar uma vírgula e escrever a nova categoria em baixo!
-            const listasDeCategorias = {
-                
-                "sistemas": [
-                    "Erro no Sistema Hospitalar (SoulMV/PEP)",
-                    "Reset de Senha(MV/PEP)/ Desbloqueio de Usuário(MV/PEP)",
-                    "Lentidão no Sistema",
-                    "Outros (Software)"
-                ],
-
-                "equipamentos": [
-                    "Computador não liga",
-                    "Criação de Novo Acesso",
-                    "Falta de Internet / Problema no Cabo de Rede",
-                    "Impressora com defeito / Sem Toner",
-                    "Teclado ou Mouse com defeito",
-                    "Telefone / Ramal Mudo",
-                    "Outros (Equipamentos)"
-                ]
-            };
-
-            // =========================================================
-            // 📌 DICIONÁRIO DE LOCALIZAÇÕES
-            // =========================================================
-            const listasDeLocalizacoes = {
-                "Emergência Pediátrica": [
-                    "Posto (Sala Vermelha)",
-                    "Sala Verde",
-                    "Sala Amarela",
-                    "Consultório 1",
-                    "Consultório 2"
-                ],
-
-                "Emergência Obstétrica": [
-                    "Posto",
-                    "Consultório 1",
-                    "Consultório 2"
-                ]
-
-                
-                // Se no futuro você quiser fazer isso para a UTI, é só adicionar aqui:
-                // "UTI Adulto": ["Leito 1", "Leito 2", "Leito 3"]
-            };
-
-            function atualizarLocalizacao() {
-                const setorSelecionado = document.getElementById('setor').value;
-                const caixaLocalizacao = document.getElementById('caixa-localizacao');
-                const selectLocalizacao = document.getElementById('localizacao');
-
-                // Limpa as opções da localização
-                selectLocalizacao.innerHTML = '<option value="">Selecione o local exato...</option>';
-
-                // Se o setor escolhido estiver no nosso dicionário de localizações...
-                if (listasDeLocalizacoes[setorSelecionado]) {
-                    caixaLocalizacao.style.display = 'block'; // Mostra a caixa
-                    selectLocalizacao.required = true; // Torna obrigatório preencher
-
-                    // Preenche com as opções
-                    listasDeLocalizacoes[setorSelecionado].forEach(loc => {
-                        selectLocalizacao.innerHTML += `<option value="${loc}">${loc}</option>`;
-                    });
-                } else {
-                    // Se o setor não tem localização específica, esconde a caixa
-                    caixaLocalizacao.style.display = 'none';
-                    selectLocalizacao.required = false; 
-                    selectLocalizacao.value = ""; 
+        function carregarChat(idChamado) {
+            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            .then(res => res.json())
+            .then(mensagens => {
+                const caixa = document.getElementById('caixa-chat');
+                caixa.innerHTML = ''; 
+                if (mensagens.length === 0) {
+                    caixa.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; margin-top:20px;">Nenhuma mensagem. Inicie a conversa!</p>';
+                    return;
                 }
-            }
+                mensagens.forEach(m => {
+                    const ehMinha = m.remetenteId === parseInt(idLogado);
+                    const corFundo = ehMinha ? '#d1e7dd' : '#e2e3e5';
+                    const alinhamento = ehMinha ? 'align-self: flex-end;' : 'align-self: flex-start;';
+                    const quemEnviou = ehMinha ? 'Você' : `${m.nomeRemetente} (${m.perfilRemetente})`;
 
-            // =========================================================
-            // FUNÇÃO QUE FAZ A TROCA DAS OPÇÕES NA TELA
-            // =========================================================
-            function atualizarCategorias() {
-                // Descobre qual opção o usuário escolheu (sistemas ou equipamentos)
-                const tipoSelecionado = document.getElementById('tipoSuporte').value;
-                const selectCategoria = document.getElementById('categoria');
-
-                // Limpa a caixinha de baixo sempre que o usuário trocar a opção de cima
-                selectCategoria.innerHTML = '<option value="">Selecione a Categoria exata...</option>';
-
-                // Se o usuário selecionou uma opção válida
-                if (tipoSelecionado !== "") {
-                    // Pega a lista certa do nosso dicionário ali em cima
-                    const categoriasParaMostrar = listasDeCategorias[tipoSelecionado];
-
-                    // Cria uma nova <option> para cada item da lista
-                    categoriasParaMostrar.forEach(cat => {
-                        selectCategoria.innerHTML += `<option value="${cat}">${cat}</option>`;
-                    });
-                }
-            }
-
-                function carregarChat(idChamado) {
-        fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios`)
-        .then(res => res.json())
-        .then(mensagens => {
-            const caixa = document.getElementById('caixa-chat');
-            caixa.innerHTML = ''; 
-            
-            if (mensagens.length === 0) {
-                caixa.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; margin-top:20px;">Nenhuma mensagem. Inicie a conversa!</p>';
-                return;
-            }
-
-            mensagens.forEach(m => {
-                const ehMinha = m.remetenteId === parseInt(idLogado);
-                const corFundo = ehMinha ? '#d1e7dd' : '#e2e3e5';
-                const alinhamento = ehMinha ? 'align-self: flex-end;' : 'align-self: flex-start;';
-                const quemEnviou = ehMinha ? 'Você' : `${m.nomeRemetente} (${m.perfilRemetente})`;
-
-                caixa.innerHTML += `
-                    <div style="max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${corFundo}; ${alinhamento}">
-                        <strong style="font-size: 11px; color: #555;">${quemEnviou} - ${m.data}</strong><br>
-                        <span style="font-size: 14px; color: #000;">${m.mensagem}</span>
-                    </div>
-                `;
+                    caixa.innerHTML += `
+                        <div style="max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${corFundo}; ${alinhamento}">
+                            <strong style="font-size: 11px; color: #555;">${quemEnviou} - ${m.data}</strong><br>
+                            <span style="font-size: 14px; color: #000;">${m.mensagem}</span>
+                        </div>
+                    `;
+                });
+                caixa.scrollTop = caixa.scrollHeight;
             });
-            caixa.scrollTop = caixa.scrollHeight;
-        });
-    }
+        }
 
-    function enviarMensagem() {
-        const input = document.getElementById('input-mensagem');
-        const texto = input.value.trim();
+        function enviarMensagem() {
+            const input = document.getElementById('input-mensagem');
+            const texto = input.value.trim();
+            if (texto === '') return; 
+            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
+            }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
+        }
+
+        function verificarEnter(event) { if (event.key === 'Enter') enviarMensagem(); }
+
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission();
+
+        function mostrarNotificacaoNavegador(titulo, texto) {
+            if (Notification.permission === "granted") new Notification(titulo, { body: texto, icon: "https://cdn-icons-png.flaticon.com/512/1006/1006509.png" });
+        }
+
+        function checarNotificacoesGlobais() {
+            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
+            .then(res => res.json())
+            .then(dados => {
+                const memoriaAntiga = JSON.stringify(notificacoesChat);
+                notificacoesChat = dados; 
+                
+                if(memoriaAntiga !== JSON.stringify(dados)) {
+                    if (typeof carregarMeusChamados === "function") carregarMeusChamados();
+                }
+                
+                if(dados.length > 0) {
+                    const maiorIdBanco = Math.max(...dados.map(d => d.ultimaMensagemId));
+                    if(memoriaGlobalChat === 0) memoriaGlobalChat = maiorIdBanco; 
+                    else if (maiorIdBanco > memoriaGlobalChat) {
+                        memoriaGlobalChat = maiorIdBanco;
+                        new Audio('sons/msn-sound_1.mp3').play().catch(e => {}); 
+                        mostrarNotificacaoNavegador("Nova Mensagem - Help Desk", "A TI respondeu ao seu chamado!");
+                    }
+                }
+            });
+        }
+
         
-        if (texto === '') return; 
-
-        fetch('http://10.21.3.8:61759/api/chamados/comentario', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                ChamadoId: chamadoAbertoId, 
-                RemetenteId: parseInt(idLogado), 
-                Mensagem: texto 
+        // ==========================================
+        // INÍCIO: MÁGICA DE PREENCHER A CAIXA DE IP SOZINHA
+        // ==========================================
+        function autocompletarIP() {
+            fetch('http://10.21.3.8:61759/api/meu-ip')
+            .then(res => res.json())
+            .then(dados => {
+                if(dados.meuIp) {
+                    // Pega a caixinha de texto e joga o IP lá dentro!
+                    document.getElementById('ip').value = dados.meuIp;
+                }
             })
-        }).then(() => {
-            input.value = ''; 
-            carregarChat(chamadoAbertoId); 
+            .catch(erro => console.log("Não foi possível detectar o IP. O campo ficará em branco para o usuário preencher."));
+        }
+
+        // ==========================================
+        // FECHAR O MODAL AO CLICAR FORA OU APERTAR ESC
+        // ==========================================
+        
+        // Espião do botão ESC no teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                fecharModal();
+            }
         });
-    }
 
-            
+        // Espião de clique na "sombra" preta atrás da janelinha
+        document.getElementById('fundo-modal').addEventListener('click', function() {
+            fecharModal();
+        });
 
-        // Carrega a tabela assim que a página abrir
-        carregarMeusChamados();
+        // Chama a função assim que a página abrir
+        autocompletarIP();
 
-        // 👇 ADICIONE ESTA LINHA ABAIXO 👇
-        // Ativa o relógio: atualiza a tela do usuário automaticamente a cada 10 segundos
+        carregarMeusChamados(); 
         setInterval(carregarMeusChamados, 10000);
+        checarNotificacoesGlobais(); 
+        setInterval(checarNotificacoesGlobais, 5000);
                 
     </script>
 
