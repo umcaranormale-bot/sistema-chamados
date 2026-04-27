@@ -47,7 +47,15 @@
             cursor: pointer;
             font-weight: bold;
         }
+
         .btn-entrar:hover { background-color: #0b5ed7; }
+
+        .cadastro {
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
         
         #mensagem-erro {
             color: red;
@@ -68,7 +76,8 @@
             <input type="password" id="senha" class="campo-input" placeholder="Sua Senha" required>
             
             <button type="submit" class="btn-entrar">Entrar no Sistema</button>
-            <a href="cadastro.html">Criar uma conta</a>
+            <a href="recuperar-senha.html" style="display: block; margin-top: 15px; color: #6c757d; font-size: 14px; text-decoration: none;">Esqueci minha senha</a>
+            <a href="cadastro.html" class="cadastro">Criar uma conta</a>
         </form>
 
         <p id="mensagem-erro">E-mail ou senha incorretos.</p>

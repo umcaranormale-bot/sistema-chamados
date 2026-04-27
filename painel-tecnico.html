@@ -62,7 +62,16 @@
         <textarea id="modal-descricao" rows="3" style="width: 100%; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 8px; resize: none;" readonly></textarea>
 
         <div id="bloco-anexo" style="display: none; margin-top: 10px;">
-            <a id="btn-ver-anexo" href="#" target="_blank" style="background-color: #0dcaf0; color: black; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">📎 Abrir Anexo (Foto/Vídeo)</a>
+            <button onclick="mostrarMidia(event)" style="background-color: #0dcaf0; color: black; padding: 8px 12px; border-radius: 4px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; width: 100%;">📎 Ver Anexo (Foto/Vídeo)</button>
+            
+            <div id="container-midia" style="display: none; margin-top: 10px; text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #f8f9fa;">
+                <button onclick="esconderMidia()" style="background: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; float: right; font-size: 12px; margin-bottom: 5px;">Fechar Anexo</button>
+                <div style="clear: both;"></div> <img id="img-anexo-preview" src="" style="max-width: 100%; max-height: 200px; border-radius: 4px; display: none; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                
+                <video id="vid-anexo-preview" controls style="max-width: 100%; max-height: 200px; border-radius: 4px; display: none; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></video>
+                
+                <a id="link-download-externo" href="#" target="_blank" style="display: none; margin-top: 10px; font-weight: bold; color: #0d6efd;">⬇️ Fazer Download do Arquivo</a>
+            </div>
         </div>
 
         <div id="bloco-solucao" style="display: none; background-color: #d1e7dd; padding: 10px; border-radius: 4px; border-left: 4px solid #198754; margin-top: 15px;">
@@ -185,9 +194,15 @@
             if(campoIp) campoIp.innerText = chamado.ip;
 
             const blocoAnexo = document.getElementById('bloco-anexo');
+            document.getElementById('container-midia').style.display = 'none'; 
+            document.getElementById('img-anexo-preview').style.display = 'none';
+            document.getElementById('vid-anexo-preview').style.display = 'none';
+            document.getElementById('link-download-externo').style.display = 'none';
+
             if (chamado.anexo && blocoAnexo) {
                 blocoAnexo.style.display = 'block';
-                document.getElementById('btn-ver-anexo').href = 'http://10.21.3.8:61759' + chamado.anexo;
+                // Salva a URL do arquivo na memória da janela para o botão usar depois
+                window.urlAnexoAtual = 'http://10.21.3.8:61759' + chamado.anexo;
             } else if (blocoAnexo) {
                 blocoAnexo.style.display = 'none';
             }
@@ -275,6 +290,42 @@
                     }
                 }
             });
+        }
+
+        function mostrarMidia(event) {
+            event.preventDefault(); // Impede o botão de atualizar a página
+            const container = document.getElementById('container-midia');
+            const img = document.getElementById('img-anexo-preview');
+            const vid = document.getElementById('vid-anexo-preview');
+            const link = document.getElementById('link-download-externo');
+            
+            // Pausa o vídeo anterior se estiver tocando
+            vid.pause();
+            vid.removeAttribute('src');
+            
+            const url = window.urlAnexoAtual;
+            if (!url) return;
+
+            container.style.display = 'block'; // Mostra o quadradinho
+
+            if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+                img.src = url;
+                img.style.display = 'block';
+            } else if (url.toLowerCase().match(/\.(mp4|webm|ogg)$/)) {
+                vid.src = url;
+                vid.style.display = 'block';
+            } else {
+                // Se for PDF ou Word, cria um link normal para download
+                link.href = url;
+                link.style.display = 'block';
+            }
+        }
+
+        function esconderMidia() {
+            document.getElementById('container-midia').style.display = 'none'; // Esconde o quadradinho
+            const vid = document.getElementById('vid-anexo-preview');
+            vid.pause(); // Pausa o vídeo para não ficar tocando o som fantasma!
+            vid.removeAttribute('src');
         }
 
         // O espião não vai mais quebrar, pois o fundo-modal já existe!

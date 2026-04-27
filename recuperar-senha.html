@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar Senha - Help Desk TI</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .caixa { background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%; max-width: 350px; text-align: center; }
+        .campo-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-acao { width: 100%; padding: 10px; background-color: #0d6efd; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.2s; }
+        .btn-acao:hover { opacity: 0.9; }
+        .link-voltar { color: #6c757d; text-decoration: none; font-size: 14px; }
+        #mensagem-alerta { margin-top: 15px; font-size: 14px; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="caixa">
+        <h2>🔒 Recuperar Senha</h2>
+
+        <div id="bloco-solicitar">
+            <p style="font-size: 14px; color: #555;">Digite seu e-mail cadastrado para receber o código de recuperação.</p>
+            <input type="email" id="email-recuperacao" class="campo-input" placeholder="Seu E-mail" required>
+            <button onclick="solicitarCodigo()" class="btn-acao">Enviar Código</button>
+        </div>
+
+        <div id="bloco-codigo" style="display: none;">
+            <p style="font-size: 14px; color: #198754; font-weight: bold;">Código enviado! Verifique seu e-mail.</p>
+            <input type="text" id="codigo-digitado" class="campo-input" placeholder="Código de 6 dígitos" required maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+            <button onclick="validarCodigo()" class="btn-acao" style="background-color: #ffc107; color: black;">Verificar Código</button>
+        </div>
+
+        <div id="bloco-nova-senha" style="display: none;">
+            <p style="font-size: 14px; color: #0d6efd; font-weight: bold;">Código aprovado! Crie sua nova senha.</p>
+            <input type="password" id="nova-senha" class="campo-input" placeholder="Sua Nova Senha" required>
+            <input type="password" id="confirma-senha" class="campo-input" placeholder="Confirme a Nova Senha" required>
+            <button onclick="redefinirSenha()" class="btn-acao" style="background-color: #198754;">Salvar Nova Senha</button>
+        </div>
+
+        <p id="mensagem-alerta"></p>
+        <br>
+        <a href="sistema.html" class="link-voltar">⬅️ Voltar para o Login</a>
+    </div>
+
+    <script>
+        function mostrarAlerta(texto, cor) {
+            const alerta = document.getElementById('mensagem-alerta');
+            alerta.innerText = texto;
+            alerta.style.color = cor;
+            alerta.style.display = 'block';
+        }
+
+        // --- ETAPA 1 ---
+        function solicitarCodigo() {
+            const email = document.getElementById('email-recuperacao').value;
+            if (!email) return mostrarAlerta("Digite seu e-mail!", "red");
+
+            mostrarAlerta("Enviando código... aguarde.", "#0d6efd");
+
+            fetch('http://10.21.3.8:61759/api/recuperar-senha/solicitar', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Email: email })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(resultado => {
+                if (resultado.status === 200) {
+                    document.getElementById('bloco-solicitar').style.display = 'none';
+                    document.getElementById('bloco-codigo').style.display = 'block';
+                    document.getElementById('mensagem-alerta').style.display = 'none';
+                } else {
+                    mostrarAlerta(resultado.body.mensagem, "red");
+                }
+            })
+            .catch(erro => {
+                mostrarAlerta("Falha ao contatar o servidor.", "red");
+            });
+        }
+
+        // --- ETAPA 2 ---
+        function validarCodigo() {
+            const email = document.getElementById('email-recuperacao').value;
+            const codigo = document.getElementById('codigo-digitado').value;
+            if (!codigo) return mostrarAlerta("Digite o código!", "red");
+
+            fetch('http://10.21.3.8:61759/api/recuperar-senha/validar-codigo', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Email: email, Codigo: codigo })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(resultado => {
+                if (resultado.status === 200) {
+                    document.getElementById('bloco-codigo').style.display = 'none';
+                    document.getElementById('bloco-nova-senha').style.display = 'block';
+                    document.getElementById('mensagem-alerta').style.display = 'none';
+                } else {
+                    mostrarAlerta(resultado.body.mensagem, "red");
+                }
+            });
+        }
+
+        // --- ETAPA 3 ---
+        function redefinirSenha() {
+            const email = document.getElementById('email-recuperacao').value;
+            const codigo = document.getElementById('codigo-digitado').value;
+            const novaSenha = document.getElementById('nova-senha').value;
+            const confirma = document.getElementById('confirma-senha').value;
+
+            if (!novaSenha) return mostrarAlerta("Preencha a nova senha!", "red");
+            if (novaSenha !== confirma) return mostrarAlerta("As senhas não são iguais!", "red");
+
+            fetch('http://10.21.3.8:61759/api/recuperar-senha/redefinir', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Email: email, Codigo: codigo, NovaSenha: novaSenha })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(resultado => {
+                if (resultado.status === 200) {
+                    alert("✅ " + resultado.body.mensagem);
+                    window.location.href = "sistema.html"; // Volta pro login com a senha nova
+                } else {
+                    mostrarAlerta(resultado.body.mensagem, "red");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
