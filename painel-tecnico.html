@@ -25,7 +25,7 @@
 <body>
     <div class="card">
         <h2>🛠 Gerenciamento de TI</h2>
-        <a href="sistema.html" style="color: red; text-decoration: none;">Sair do Sistema</a>
+        <a href="index.html" style="color: red; text-decoration: none;">Sair do Sistema</a>
 
         <div class="filtros">
             <div class="filtros">
@@ -102,7 +102,7 @@
         let filtroAtual = 'Todos'; 
 
         const idLogado = localStorage.getItem('usuarioLogado_Id');
-        if(!idLogado) window.location.href = "sistema.html";
+        if(!idLogado) window.location.href = "index.html";
 
         function buscarTodos() {
             fetch('http://10.21.3.8:61759/api/chamados')

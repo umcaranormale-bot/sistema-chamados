@@ -39,7 +39,7 @@
 
         <p id="mensagem-alerta"></p>
         <br>
-        <a href="sistema.html" class="link-voltar">⬅️ Voltar para o Login</a>
+        <a href="index.html" class="link-voltar">⬅️ Voltar para o Login</a>
     </div>
 
     <script>
@@ -116,7 +116,7 @@
             .then(resultado => {
                 if (resultado.status === 200) {
                     alert("✅ " + resultado.body.mensagem);
-                    window.location.href = "sistema.html"; // Volta pro login com a senha nova
+                    window.location.href = "index.html"; // Volta pro login com a senha nova
                 } else {
                     mostrarAlerta(resultado.body.mensagem, "red");
                 }

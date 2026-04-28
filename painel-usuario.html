@@ -226,7 +226,7 @@
         const nomeLogado = localStorage.getItem('usuarioLogado_Nome');
         const emailLogado = localStorage.getItem('usuarioLogado_Email');
 
-        if(!idLogado) window.location.href = "sistema.html";
+        if(!idLogado) window.location.href = "index.html";
         else {
             document.getElementById('nome-usuario').innerText = nomeLogado;
             document.getElementById('nomeSolicitante').value = nomeLogado;
@@ -235,7 +235,7 @@
         function fazerLogout() {
             if(confirm("Tem certeza que deseja sair do sistema?")) {
                 localStorage.clear(); 
-                window.location.href = "sistema.html"; 
+                window.location.href = "index.html"; 
             }
         }
 
