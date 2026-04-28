@@ -113,7 +113,7 @@
                 </select>
             </div> <div class="grupo-campo" id="caixa-localizacao" style="display: none;">
                 <label>Localização (Obrigatório)</label>
-                <select id="localizacao" style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
+                <<select id="localizacao" onchange="atualizarPlaceholder()" style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc;">
                     <option value="">Selecione o local exato...</option>
                 </select>
             </div>
@@ -240,7 +240,7 @@
         }
 
         function carregarMeusChamados() {
-            fetch(`http://localhost:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
+            fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
                 .then(res => res.json())
                 .then(chamados => {
                     chamadosDoUsuario = chamados; 
@@ -293,7 +293,7 @@
             if (chamado.anexo && blocoAnexo) {
                 blocoAnexo.style.display = 'block';
                 // Salva a URL do arquivo na memória da janela para o botão usar depois
-                window.urlAnexoAtual = 'http://localhost:61759' + chamado.anexo;
+                window.urlAnexoAtual = 'http://10.21.3.8:61759' + chamado.anexo;
             } else if (blocoAnexo) {
                 blocoAnexo.style.display = 'none';
             }
@@ -361,6 +361,7 @@
                 "Zeladoria"
                 
             ],
+
             "1° Andar": [
                 "Arquivo Médico", 
                 "Clínica Pediátrica(Pavilhão)", 
@@ -377,60 +378,68 @@
                 "Teste da Orelhinha",
                 "Teste do Pezinho",
                 "Prestação de Contas",
-                "Custos/Patrimônio",
-                "Educação em Saúde - UES",
+                "Custos",
+                "Patrimônio",
+                "Educação em Saúde(UES)",
                 "Conselho Gestor",
                 "CEAB MMH",
-                "Farmácia",
+                "Farmácia D.I",
+                "Farmácia Ambulatorial",
                 "VEAH"   
             ],
+
             "2° Andar": [
                 "Hemodiálise/Nefrologia", 
                 "UTI Adulto", 
                 "Bloco Cirúrgico",
-                "Nutrição",
+                "Copa Nutrição",
                 "UTI Pediátrica"
             ],
+
             "3° Andar": [
                 "Engenharia Clínica", 
                 "Banco de Leite",
                 "UTI Pediátrica",
                 "UCI 2",
-                "Nutrição",
+                "Copa Nutrição",
                 "CME",
                 "Alojamento Sulfato",
                 "Vascular",
-                "Planejemaneto Cirúrgico"
+                "Planejamento Cirúrgico"
             ],
+
             "4° Andar": [
-                "Nutrição", 
+                "Copa Nutrição", 
                 "Alojamento Canguru", 
                 "COB", 
                 "Alto Risco", 
-                "UTI Neo 1", 
-                "UTI Neo 2", 
-                "Serviço Social",  
-                "Suprimentos"
+                "UTI Neo 1",  
+                "Serviço Social",
+                "Sala dos Médicos"
             ],
+
             "5° Andar": [
-                "Nutrição",
+                "Copa Nutrição",
                 "Faturamento",
                 "Alojamento Conjunto",
                 "Cartório",
                 "Sala de Evolução"
             ],
+
             "6° Andar": [
                 "Clínica Médica",
-                "Nutrição",
+                "Copa Nutrição",
                 "Oncologia"
             ],
+
             "7° Andar": [
                 "Cirurgia Geral",
                 "Ginecologia",
                 "Proctologia",
-                "Nutrição",
+                "Copa Nutrição",
                 "CCIH"
             ],
+
             "8° Andar": [
                 "Direção",
                 "SAF",
@@ -446,8 +455,69 @@
         };
 
         const listasDeLocalizacoes = {
-            "Emergência Pediátrica": ["Posto (Sala Vermelha)", "Sala Verde", "Sala Amarela", "Consultório 1", "Consultório 2"],
-            "Emergência Obstétrica": ["Posto", "Consultório 1", "Consultório 2"]
+            "Emergência Pediátrica": [
+                "Posto (Sala Vermelha)", 
+                "Sala Verde", 
+                "Sala Amarela", 
+                "Consultório 1", 
+                "Consultório 2"
+            ],
+
+            "Emergência Obstétrica": [
+                "Posto",
+                "Classificação", 
+                "Consultório 1", 
+                "Consultório 2"
+            ],
+
+            "Ambulatório": [
+                "Recepção", 
+                "Gerência", 
+                "Corredor 1", 
+                "Corredor 2", 
+                "Oncologia", 
+                "Auditório"
+            ],
+
+            "Sala da Nutrição": [
+                "Sala da Nutrição",
+                "Copa 1° Andar"
+            ],
+
+            "Imaginologia": [
+                "Recepção",
+                "Ultrassom",
+                "Mamografia",
+                "Tomografia",
+                "Sala de Laudos",
+                "Eletrocenfalograma",
+                "Coordenação"
+            ],
+
+            "Hemodiálise/Nefrologia": [
+                "Recepção",
+                "Coordenação",
+                "Sala Final Hemodiálise",
+                "Sala dos Médicos",
+                "Sala de Atendimento Médico",
+                "Serviço Social"
+            ],
+
+            "COB": [
+                "Sala de Parto",
+                "Sala dos RN"
+            ],
+
+            "UTI Neo": [
+                "UTI Neo 2",
+                "UTI Neo 1",
+                "Coordenação"
+            ],
+
+            "Clínica Médica": [
+                "Sala dos Médicos",
+                "Posto"
+            ]
         };
 
         function atualizarLocalizacao() {
@@ -463,6 +533,26 @@
                 caixaLoc.style.display = 'none';
                 selectLoc.required = false; 
                 selectLoc.value = ""; 
+            }
+            
+            // 👇 LINHA NOVA: Reseta o texto se o usuário trocar de andar
+            document.getElementById('descricao').placeholder = "Descreva o problema...";
+        }
+
+        const placeholdersDinamicos = {
+            "Sala dos Médicos": "Ex: Descreva seu problema e informe de qual LADO do andar você está...",
+            "Posto (Sala Vermelha)": "Ex: Descreva o seu problema",
+            "Recepção": "Ex: Descreva o seu problema"
+        };
+
+        function atualizarPlaceholder() {
+            const locSelecionada = document.getElementById('localizacao').value;
+            const caixaDescricao = document.getElementById('descricao');
+
+            if (placeholdersDinamicos[locSelecionada]) {
+                caixaDescricao.placeholder = placeholdersDinamicos[locSelecionada];
+            } else {
+                caixaDescricao.placeholder = "Descreva o problema...";
             }
         }
 
@@ -621,7 +711,7 @@
 
             // Mudamos o Fetch. Não enviamos mais 'Content-Type' (o navegador faz sozinho para arquivos)
             // ... (resto do seu fetch) ...
-            fetch('http://localhost:61759/api/chamados', { 
+            fetch('http://10.21.3.8:61759/api/chamados', { 
                 method: 'POST', 
                 body: pacoteFormulario 
             })
@@ -656,7 +746,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`http://localhost:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -686,7 +776,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('http://localhost:61759/api/chamados/comentario', {
+            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -701,7 +791,7 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`http://localhost:61759/api/notificacoes/chat/${meuPerfil}`)
+            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);
@@ -728,7 +818,7 @@
         // INÍCIO: MÁGICA DE PREENCHER A CAIXA DE IP SOZINHA
         // ==========================================
         function autocompletarIP() {
-            fetch('http://localhost:61759/api/meu-ip')
+            fetch('http://10.21.3.8:61759/api/meu-ip')
             .then(res => res.json())
             .then(dados => {
                 if(dados.meuIp) {
@@ -791,14 +881,15 @@
             fecharModal();
         });
 
-        // Chama a função assim que a página abrir
-        autocompletarIP();
+        // Chama a função assim que a página abrir APENAS se estiver logado
+        if (idLogado) {
+            autocompletarIP();
 
-        carregarMeusChamados(); 
-        setInterval(carregarMeusChamados, 10000);
-        checarNotificacoesGlobais(); 
-        setInterval(checarNotificacoesGlobais, 5000);
-                
+            carregarMeusChamados(); 
+            setInterval(carregarMeusChamados, 10000);
+            checarNotificacoesGlobais(); 
+            setInterval(checarNotificacoesGlobais, 5000);
+        }
     </script>
 
 </body>

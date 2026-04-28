@@ -89,7 +89,7 @@
             event.preventDefault(); 
 
             // 2. O Endereço do nosso C# (Já com a sua porta!)
-            const urlAPI = 'http://localhost:61759/api/login';
+            const urlAPI = 'http://10.21.3.8:61759/api/login';
 
             // 3. Pega o que o usuário digitou nas caixinhas
             const emailDigitado = document.getElementById('email').value;
@@ -102,7 +102,7 @@
             };
 
             // 5. Chama o Garçom (O Fetch), mas agora enviando dados (POST)
-            fetch('http://localhost:61759/api/login', {
+            fetch('http://10.21.3.8:61759/api/login', {
                 method: 'POST', // Mudamos de GET para POST!
                 headers: {
                     'Content-Type': 'application/json' // Avisa o C# que estamos mandando um JSON
