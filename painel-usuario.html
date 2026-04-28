@@ -240,7 +240,7 @@
         }
 
         function carregarMeusChamados() {
-            fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
+            fetch(`http://localhost:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
                 .then(res => res.json())
                 .then(chamados => {
                     chamadosDoUsuario = chamados; 
@@ -293,7 +293,7 @@
             if (chamado.anexo && blocoAnexo) {
                 blocoAnexo.style.display = 'block';
                 // Salva a URL do arquivo na memória da janela para o botão usar depois
-                window.urlAnexoAtual = 'http://10.21.3.8:61759' + chamado.anexo;
+                window.urlAnexoAtual = 'http://localhost:61759' + chamado.anexo;
             } else if (blocoAnexo) {
                 blocoAnexo.style.display = 'none';
             }
@@ -621,7 +621,7 @@
 
             // Mudamos o Fetch. Não enviamos mais 'Content-Type' (o navegador faz sozinho para arquivos)
             // ... (resto do seu fetch) ...
-            fetch('http://10.21.3.8:61759/api/chamados', { 
+            fetch('http://localhost:61759/api/chamados', { 
                 method: 'POST', 
                 body: pacoteFormulario 
             })
@@ -656,7 +656,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`http://localhost:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -686,7 +686,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+            fetch('http://localhost:61759/api/chamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -701,7 +701,7 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
+            fetch(`http://localhost:61759/api/notificacoes/chat/${meuPerfil}`)
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);
@@ -728,7 +728,7 @@
         // INÍCIO: MÁGICA DE PREENCHER A CAIXA DE IP SOZINHA
         // ==========================================
         function autocompletarIP() {
-            fetch('http://10.21.3.8:61759/api/meu-ip')
+            fetch('http://localhost:61759/api/meu-ip')
             .then(res => res.json())
             .then(dados => {
                 if(dados.meuIp) {

@@ -57,7 +57,7 @@
 
             mostrarAlerta("Enviando código... aguarde.", "#0d6efd");
 
-            fetch('http://10.21.3.8:61759/api/recuperar-senha/solicitar', {
+            fetch('http://localhost:61759/api/recuperar-senha/solicitar', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Email: email })
             })
@@ -82,7 +82,7 @@
             const codigo = document.getElementById('codigo-digitado').value;
             if (!codigo) return mostrarAlerta("Digite o código!", "red");
 
-            fetch('http://10.21.3.8:61759/api/recuperar-senha/validar-codigo', {
+            fetch('http://localhost:61759/api/recuperar-senha/validar-codigo', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Email: email, Codigo: codigo })
             })
@@ -108,7 +108,7 @@
             if (!novaSenha) return mostrarAlerta("Preencha a nova senha!", "red");
             if (novaSenha !== confirma) return mostrarAlerta("As senhas não são iguais!", "red");
 
-            fetch('http://10.21.3.8:61759/api/recuperar-senha/redefinir', {
+            fetch('http://localhost:61759/api/recuperar-senha/redefinir', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Email: email, Codigo: codigo, NovaSenha: novaSenha })
             })
