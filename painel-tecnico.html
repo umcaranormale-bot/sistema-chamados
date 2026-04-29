@@ -105,7 +105,7 @@
         if(!idLogado) window.location.href = "index.html";
 
         function buscarTodos() {
-            fetch('http://10.21.3.8:61759/api/chamados')
+            fetch('/backend/apichamados')
                 .then(res => res.json())
                 .then(dados => {
                     chamadosOriginais = dados;
@@ -174,12 +174,12 @@
         }
 
         function mudarStatus(id, novo) {
-            fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: novo }) }).then(() => buscarTodos());
+            fetch('/backend/apichamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: novo }) }).then(() => buscarTodos());
         }
 
         function prepararConclusao(id) {
             const resposta = prompt("Descreva o laudo técnico:");
-            if (resposta) fetch('http://10.21.3.8:61759/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta }) }).then(() => buscarTodos());
+            if (resposta) fetch('/backend/apichamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta }) }).then(() => buscarTodos());
         }
 
         function abrirModal(id) {
@@ -227,7 +227,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`/backend/apichamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -257,7 +257,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+            fetch('/backend/apichamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -272,7 +272,7 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
+            fetch(`/backend/apinotificacoes/chat/${meuPerfil}`)
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);

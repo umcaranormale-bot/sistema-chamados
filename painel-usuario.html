@@ -240,7 +240,7 @@
         }
 
         function carregarMeusChamados() {
-            fetch(`http://10.21.3.8:61759/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
+            fetch(`/backend/apichamados/usuario/${idLogado}?t=` + new Date().getTime())
                 .then(res => res.json())
                 .then(chamados => {
                     chamadosDoUsuario = chamados; 
@@ -711,7 +711,7 @@
 
             // Mudamos o Fetch. Não enviamos mais 'Content-Type' (o navegador faz sozinho para arquivos)
             // ... (resto do seu fetch) ...
-            fetch('http://10.21.3.8:61759/api/chamados', { 
+            fetch('/backend/apichamados', { 
                 method: 'POST', 
                 body: pacoteFormulario 
             })
@@ -746,7 +746,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`http://10.21.3.8:61759/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`/backend/apichamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -776,7 +776,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('http://10.21.3.8:61759/api/chamados/comentario', {
+            fetch('/backend/apichamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -791,7 +791,7 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`http://10.21.3.8:61759/api/notificacoes/chat/${meuPerfil}`)
+            fetch(`/backend/apinotificacoes/chat/${meuPerfil}`)
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);
@@ -818,7 +818,7 @@
         // INÍCIO: MÁGICA DE PREENCHER A CAIXA DE IP SOZINHA
         // ==========================================
         function autocompletarIP() {
-            fetch('http://10.21.3.8:61759/api/meu-ip')
+            fetch('/backend/apimeu-ip')
             .then(res => res.json())
             .then(dados => {
                 if(dados.meuIp) {

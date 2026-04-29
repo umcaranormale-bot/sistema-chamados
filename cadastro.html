@@ -28,7 +28,7 @@
     <script>
         function criarConta(event) {
             event.preventDefault();
-            const urlAPI = 'http://10.21.3.8:61759/api/usuarios'; 
+            const urlAPI = '/backend/apiusuarios'; 
 
             const dados = {
                 Nome: document.getElementById('nome').value,
@@ -36,7 +36,7 @@
                 Senha: document.getElementById('senha').value
             };
 
-            fetch('http://10.21.3.8:61759/api/login', {
+            fetch('/backend/apilogin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
