@@ -105,7 +105,7 @@
         if(!idLogado) window.location.href = "index.html";
 
         function buscarTodos() {
-            fetch('/backend/apichamados')
+            fetch('/backend/api/chamados')
                 .then(res => res.json())
                 .then(dados => {
                     chamadosOriginais = dados;
@@ -174,12 +174,12 @@
         }
 
         function mudarStatus(id, novo) {
-            fetch('/backend/apichamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: novo }) }).then(() => buscarTodos());
+            fetch('/backend/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: novo }) }).then(() => buscarTodos());
         }
 
         function prepararConclusao(id) {
             const resposta = prompt("Descreva o laudo técnico:");
-            if (resposta) fetch('/backend/apichamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta }) }).then(() => buscarTodos());
+            if (resposta) fetch('/backend/api/chamados/atualizar-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ChamadoId: id, NovoStatus: 'Concluído', Solucao: resposta }) }).then(() => buscarTodos());
         }
 
         function abrirModal(id) {
@@ -227,7 +227,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`/backend/apichamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`/backend/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -257,7 +257,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('/backend/apichamados/comentario', {
+            fetch('/backend/api/chamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -272,7 +272,7 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`/backend/apinotificacoes/chat/${meuPerfil}`)
+            fetch(`/backend/api/notificacoes/chat/${meuPerfil}`)
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);

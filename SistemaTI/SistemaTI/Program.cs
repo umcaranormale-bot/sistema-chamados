@@ -20,6 +20,7 @@ if (!Directory.Exists(pastaAnexos))
 }
 
 app.UseCors("PermitirTudo");
+app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
@@ -417,32 +418,33 @@ app.MapPost("/api/recuperar-senha/validar-codigo", (RequisicaoValidarCodigo pedi
 // ==========================================
 app.MapPost("/api/usuarios", (RequisicaoCadastro novoUsuario) =>
 {
-    string conexaoString = "Server=.; Database=SistemaTI; Integrated Security=True; TrustServerCertificate=True;";
-
-    // CRIPTOGRAFIA: Transformando a senha em Hash antes de salvar
-    string senhaCriptografada = BCrypt.Net.BCrypt.HashPassword(novoUsuario.Senha);
-
-    using (SqlConnection conexao = new SqlConnection(conexaoString))
+    try
     {
-        conexao.Open();
-        string query = "INSERT INTO Usuarios (Nome, Email, Senha, Perfil) VALUES (@Nome, @Email, @Senha, 'Comum')";
+        string conexaoString = "Server=.; Database=SistemaTI; Integrated Security=True; TrustServerCertificate=True;";
 
-        using (SqlCommand comando = new SqlCommand(query, conexao))
+        // CRIPTOGRAFIA
+        string senhaCriptografada = BCrypt.Net.BCrypt.HashPassword(novoUsuario.Senha);
+
+        using (SqlConnection conexao = new SqlConnection(conexaoString))
         {
-            comando.Parameters.AddWithValue("@Nome", novoUsuario.Nome);
-            comando.Parameters.AddWithValue("@Email", novoUsuario.Email);
-            comando.Parameters.AddWithValue("@Senha", senhaCriptografada); // Salvando a versão segura
+            conexao.Open();
+            string query = "INSERT INTO Usuarios (Nome, Email, Senha, Perfil) VALUES (@Nome, @Email, @Senha, 'Comum')";
 
-            try
+            using (SqlCommand comando = new SqlCommand(query, conexao))
             {
+                comando.Parameters.AddWithValue("@Nome", novoUsuario.Nome);
+                comando.Parameters.AddWithValue("@Email", novoUsuario.Email);
+                comando.Parameters.AddWithValue("@Senha", senhaCriptografada);
+
                 comando.ExecuteNonQuery();
                 return Results.Ok(new { mensagem = "Conta criada com segurança!" });
             }
-            catch
-            {
-                return Results.BadRequest(new { mensagem = "Erro ao criar conta." });
-            }
         }
+    }
+    catch (Exception ex)
+    {
+        // A MÁGICA: Retorna o erro exato do servidor para a tela do usuário!
+        return Results.Json(new { mensagem = "ERRO DETALHADO: " + ex.Message }, statusCode: 500);
     }
 });
 
@@ -666,21 +668,32 @@ app.MapGet("/api/notificacoes/chat/{perfil}", (string perfil) =>
 // ==========================================
 app.MapGet("/api/meu-ip", (HttpContext contexto) =>
 {
-    // 1. Tenta ler a "etiqueta secreta" que o roteador deixa com o IP verdadeiro do computador
+    // 1. Tenta ler a "etiqueta secreta" que o proxy/roteador deixa
     string ipReal = contexto.Request.Headers["X-Forwarded-For"].FirstOrDefault();
 
-    // 2. Se a etiqueta estiver vazia, pega o IP direto da porta
     if (string.IsNullOrEmpty(ipReal))
     {
         ipReal = contexto.Connection.RemoteIpAddress?.ToString();
     }
     else
     {
-        // Às vezes o roteador manda uma lista de IPs separados por vírgula. Pegamos só o primeiro (que é o do usuário).
         ipReal = ipReal.Split(',')[0].Trim();
     }
 
-    if (ipReal == "::1" || ipReal == "127.0.0.1") ipReal = "Localhost";
+    // 2. A MÁGICA: Se for o próprio servidor acessando, busca o IP da placa de rede
+    if (ipReal == "::1" || ipReal == "127.0.0.1" || ipReal == "Localhost")
+    {
+        var maquina = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+        foreach (var ip in maquina.AddressList)
+        {
+            // Pega apenas o IP no formato clássico (IPv4, ex: 10.21.3.8)
+            if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                ipReal = ip.ToString();
+                break;
+            }
+        }
+    }
 
     return Results.Ok(new { meuIp = ipReal });
 });

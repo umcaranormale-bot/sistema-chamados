@@ -240,7 +240,7 @@
         }
 
         function carregarMeusChamados() {
-            fetch(`/backend/apichamados/usuario/${idLogado}?t=` + new Date().getTime())
+            fetch(`/backend/api/chamados/usuario/${idLogado}?t=` + new Date().getTime())
                 .then(res => res.json())
                 .then(chamados => {
                     chamadosDoUsuario = chamados; 
@@ -711,7 +711,7 @@
 
             // Mudamos o Fetch. Não enviamos mais 'Content-Type' (o navegador faz sozinho para arquivos)
             // ... (resto do seu fetch) ...
-            fetch('/backend/apichamados', { 
+            fetch('/backend/api/chamados', { 
                 method: 'POST', 
                 body: pacoteFormulario 
             })
@@ -746,7 +746,7 @@
         }
 
         function carregarChat(idChamado) {
-            fetch(`/backend/apichamados/${idChamado}/comentarios/${meuPerfil}`)
+            fetch(`/backend/api/chamados/${idChamado}/comentarios/${meuPerfil}`)
             .then(res => res.json())
             .then(mensagens => {
                 const caixa = document.getElementById('caixa-chat');
@@ -776,7 +776,7 @@
             const input = document.getElementById('input-mensagem');
             const texto = input.value.trim();
             if (texto === '') return; 
-            fetch('/backend/apichamados/comentario', {
+            fetch('/backend/api/chamados/comentario', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ChamadoId: chamadoAbertoId, RemetenteId: parseInt(idLogado), Mensagem: texto })
             }).then(() => { input.value = ''; carregarChat(chamadoAbertoId); checarNotificacoesGlobais(); });
@@ -791,7 +791,8 @@
         }
 
         function checarNotificacoesGlobais() {
-            fetch(`/backend/apinotificacoes/chat/${meuPerfil}`)
+            // O "?t=" com a data atual força o navegador a pedir dados novos sempre!
+            fetch(`/backend/api/notificacoes/chat/${meuPerfil}?t=` + new Date().getTime())
             .then(res => res.json())
             .then(dados => {
                 const memoriaAntiga = JSON.stringify(notificacoesChat);
@@ -810,7 +811,8 @@
                         mostrarNotificacaoNavegador("Nova Mensagem - Help Desk", "A TI respondeu ao seu chamado!");
                     }
                 }
-            });
+            })
+            .catch(erro => console.log("Opa, erro no radar de notificações:", erro));
         }
 
         
@@ -818,7 +820,7 @@
         // INÍCIO: MÁGICA DE PREENCHER A CAIXA DE IP SOZINHA
         // ==========================================
         function autocompletarIP() {
-            fetch('/backend/apimeu-ip')
+            fetch('/backend/api/meu-ip')
             .then(res => res.json())
             .then(dados => {
                 if(dados.meuIp) {
