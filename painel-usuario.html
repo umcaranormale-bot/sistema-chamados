@@ -249,10 +249,12 @@
                     
                     chamados.forEach((c, index) => { 
                         let badge = '';
-                        // A bolinha agora só precisa olhar a API, sem contas matemáticas complicadas
+                        
                         if (typeof notificacoesChat !== 'undefined') {
                             const notif = notificacoesChat.find(n => n.chamadoId === c.id);
                             if (notif && notif.totalNaoLidas > 0) {
+                                // 👇 O ESPIÃO 2: Vai avisar no F12 que a bolinha vermelha está sendo desenhada!
+                                console.log(`🔴 DESENHANDO BOLINHA: Chamado ${c.numero} tem ${notif.totalNaoLidas} msgs!`);
                                 badge = `<span style="background: red; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; margin-left: 5px; position: absolute; top: -8px; right: -8px; border: 2px solid white; z-index: 10;">${notif.totalNaoLidas}</span>`;
                             }
                         }
@@ -791,10 +793,12 @@
         }
 
         function checarNotificacoesGlobais() {
-            // O "?t=" com a data atual força o navegador a pedir dados novos sempre!
             fetch(`/backend/api/notificacoes/chat/${meuPerfil}?t=` + new Date().getTime())
             .then(res => res.json())
             .then(dados => {
+                // 👇 O ESPIÃO 1: Vai mostrar no F12 se o banco de dados achou mensagens não lidas
+                console.log("📡 Radar do Usuário captou:", dados); 
+                
                 const memoriaAntiga = JSON.stringify(notificacoesChat);
                 notificacoesChat = dados; 
                 
@@ -812,7 +816,7 @@
                     }
                 }
             })
-            .catch(erro => console.log("Opa, erro no radar de notificações:", erro));
+            .catch(erro => console.log("Opa, erro no radar:", erro));
         }
 
         

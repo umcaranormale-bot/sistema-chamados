@@ -551,8 +551,10 @@ app.MapPost("/api/chamados/comentario", (ComentarioRequest pedido) =>
     using (SqlConnection conexao = new SqlConnection(conexaoString))
     {
         conexao.Open();
-        string query = @"INSERT INTO ComentariosChamado (ChamadoId, RemetenteId, Mensagem) 
-                         VALUES (@ChamadoId, @RemetenteId, @Mensagem)";
+
+        // 👇 A MÁGICA AQUI: Adicionamos o campo Lido e forçamos o valor 0 (Não Lido)
+        string query = @"INSERT INTO ComentariosChamado (ChamadoId, RemetenteId, Mensagem, Lido) 
+                         VALUES (@ChamadoId, @RemetenteId, @Mensagem, 0)";
 
         using (SqlCommand comando = new SqlCommand(query, conexao))
         {
